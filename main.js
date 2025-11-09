@@ -1,29 +1,41 @@
 // =================================================================================
-// Main (Public) Page Logic
+// Main (Public) Page Logic (Anonymous Sessions with Carousel)
 // =================================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const countdownEl = document.getElementById('countdown');
     const projectsGrid = document.getElementById('projectsGrid');
-    const loginBtn = document.getElementById('loginBtn');
     const adminBtn = document.getElementById('adminBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const userInfoEl = document.querySelector('.user-info');
-    const userAvatarEl = document.getElementById('userAvatar');
-    const userNameEl = document.getElementById('userName');
-    const authModal = document.getElementById('authModal');
-    const googleLoginBtn = document.getElementById('googleLoginBtn');
 
-    let currentUser = null;
-    let userProfile = null;
+    // --- App State ---
+    let anonymousId = null;
+    let activeSession = null;
+    let userVoteInSession = null;
+
+    // --- UUID Generator ---
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    // --- Anonymous ID Management ---
+    function getOrSetAnonymousId() {
+        let userId = localStorage.getItem('limonada_user_id');
+        if (!userId) {
+            userId = generateUUID();
+            localStorage.setItem('limonada_user_id', userId);
+        }
+        anonymousId = userId;
+    }
 
     // --- Countdown Timer ---
     function updateCountdown() {
         if (!countdownEl) return;
         const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 7); // 7 days from now
-
+        endDate.setHours(endDate.getHours() + 1);
         const now = new Date().getTime();
         const distance = endDate - now;
 
@@ -43,120 +55,109 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
     }
 
-    // --- Auth System ---
-    async function handleGoogleLogin() {
-        const { error } = await auth.signInWithGoogle();
-        if (error) {
-            showNotification('Erro ao fazer login: ' + error.message, 'error');
+    // --- Data Fetching ---
+    async function fetchActiveSession() {
+        const { data, error } = await _supabase.from('sessions').select('session_uuid').eq('is_active', true).single();
+        if (error && error.code !== 'PGRST116') {
+            console.error('Erro ao buscar sessão ativa:', error);
+            projectsGrid.innerHTML = '<p class="error-message">Não há uma votação ativa no momento.</p>';
+            return null;
         }
-    }
-
-    async function handleLogout() {
-        await auth.signOut();
-        currentUser = null;
-        userProfile = null;
-        updateUI();
-        showNotification('Você saiu da sua conta.', 'info');
-    }
-
-    async function updateUI() {
-        if (currentUser && userProfile) {
-            userInfoEl.classList.remove('hidden');
-            userAvatarEl.src = currentUser.user_metadata.avatar_url || userProfile.avatar_url;
-            userNameEl.textContent = (currentUser.user_metadata.full_name || userProfile.full_name).split(' ')[0];
-            loginBtn.classList.add('hidden');
-            logoutBtn.classList.remove('hidden');
-
-            if (userProfile.role === 'admin') {
-                adminBtn.classList.remove('hidden');
-            } else {
-                adminBtn.classList.add('hidden');
-            }
-        } else {
-            userInfoEl.classList.add('hidden');
-            loginBtn.classList.remove('hidden');
-            logoutBtn.classList.add('hidden');
-            adminBtn.classList.add('hidden');
+        if (!data) {
+            projectsGrid.innerHTML = '<p class="error-message">Nenhuma votação em andamento. Volte mais tarde!</p>';
         }
-        // Recarrega os projetos para atualizar o estado dos botões de voto
-        loadProjects();
+        activeSession = data;
+        return data;
     }
 
-    // --- Voting System ---
-    async function getUserVote(userId) {
-        if (!userId) return null;
-        const { data, error } = await _supabase
-            .from('votes')
-            .select('project_id')
-            .eq('user_id', userId)
-            .single();
-        
-        if (error && error.code !== 'PGRST116') { // PGRST116 = 'single row not found'
+    async function getUserVote(userId, sessionUUID) {
+        if (!userId || !sessionUUID) return null;
+        const { data, error } = await _supabase.from('votes').select('project_id').eq('user_id', userId).eq('session_uuid', sessionUUID).single();
+        if (error && error.code !== 'PGRST116') {
             console.error('Erro ao buscar voto do usuário:', error);
             return null;
         }
-        return data ? data.project_id : null;
+        userVoteInSession = data ? data.project_id : null;
+        return userVoteInSession;
     }
 
+    // --- Voting System ---
     window.handleVote = async (projectId) => {
-        if (!currentUser) {
-            showNotification('Faça login para votar!', 'error');
-            openAuthModal();
+        if (!anonymousId || !activeSession) {
+            showNotification('Não há uma sessão de votação ativa.', 'error');
             return;
         }
-
-        const existingVote = await getUserVote(currentUser.id);
-        if (existingVote) {
-            showNotification('Você já votou em um projeto!', 'error');
+        if (userVoteInSession) {
+            showNotification('Você já votou nesta sessão!', 'error');
             return;
         }
-
-        const { error } = await _supabase
-            .from('votes')
-            .insert({ project_id: projectId, user_id: currentUser.id });
-
+        const { error } = await _supabase.from('votes').insert({ project_id: projectId, user_id: anonymousId, session_uuid: activeSession.session_uuid });
         if (error) {
-            showNotification('Erro ao registrar voto: ' + error.message, 'error');
-            console.error('Erro ao votar:', error);
+            if (error.code === '23505') {
+                showNotification('Você já votou nesta sessão!', 'error');
+                await getUserVote(anonymousId, activeSession.session_uuid);
+                loadProjects();
+            } else {
+                showNotification('Erro ao registrar voto: ' + error.message, 'error');
+                console.error('Erro ao votar:', error);
+            }
         } else {
             showNotification('Voto registrado com sucesso!', 'success');
-            // A atualização em tempo real cuidará de recarregar os projetos
         }
     };
 
-    // --- Project Loading ---
+    // --- Project Loading & UI ---
     async function loadProjects() {
-        const { data: projects, error } = await _supabase
-            .from('projects_with_votes') // Usando a view com contagem de votos
-            .select('*')
-            .order('votes', { ascending: false });
-
-        if (error) {
-            console.error('Erro ao carregar projetos:', error);
-            projectsGrid.innerHTML = '<p>Não foi possível carregar os projetos.</p>';
+        if (!activeSession) {
+            console.log("Nenhuma sessão ativa para carregar projetos.");
             return;
         }
-        
-        const userVoteId = currentUser ? await getUserVote(currentUser.id) : null;
-        projectsGrid.innerHTML = projects.map(project => createProjectCard(project, userVoteId)).join('');
+        const { data: projects, error } = await _supabase.from('projects_with_votes').select('*').order('votes', { ascending: false });
+        if (error) {
+            console.error('Erro ao carregar projetos:', error);
+            projectsGrid.innerHTML = '<p class="error-message">Não foi possível carregar os projetos.</p>';
+            return;
+        }
+        projectsGrid.innerHTML = projects.map(project => createProjectCard(project, userVoteInSession)).join('');
+        initializeCarousels(); // Ativa a lógica dos carrosséis
     }
 
-    function createProjectCard(project, userVoteId) {
-        const hasVotedForThis = userVoteId === project.id;
-        const canVote = !userVoteId;
+    function createProjectCard(project, votedProjectId) {
+        const hasVotedForThis = votedProjectId === project.id;
+        const hasVotedInSession = votedProjectId !== null;
 
         let btnHtml;
         if (hasVotedForThis) {
             btnHtml = `<button class="vote-btn voted" disabled><i class="fas fa-check"></i> Votado</button>`;
-        } else if (canVote) {
-            btnHtml = `<button class="vote-btn" onclick="window.handleVote(${project.id})">Votar</button>`;
-        } else {
+        } else if (hasVotedInSession) {
             btnHtml = `<button class="vote-btn" disabled>Você já votou</button>`;
+        } else {
+            btnHtml = `<button class="vote-btn" onclick="window.handleVote(${project.id})">Votar</button>`;
+        }
+
+        // --- Carousel HTML Generation ---
+        let imageHtml;
+        if (project.image && Array.isArray(project.image) && project.image.length > 0) {
+            const images = project.image.map((imgUrl, index) => 
+                `<img src="${imgUrl}" alt="${project.name} - Imagem ${index + 1}" class="carousel-item ${index === 0 ? 'active' : ''}">`
+            ).join('');
+            
+            imageHtml = `
+                <div class="carousel">
+                    <div class="carousel-inner">${images}</div>
+                    ${project.image.length > 1 ? `
+                        <button class="carousel-control prev" aria-label="Previous Image">&lt;</button>
+                        <button class="carousel-control next" aria-label="Next Image">&gt;</button>
+                    ` : ''}
+                </div>
+            `;
+        } else {
+            imageHtml = `<img src="https://placehold.co/600x400?text=Sem+Imagem" alt="${project.name}" class="project-image">`;
         }
 
         return `
             <div class="project-card" style="animation-delay: ${Math.random() * 0.3}s">
-                <img src="${project.image}" alt="${project.name}" class="project-image">
+                ${imageHtml}
                 <div class="project-content">
                     <h3 class="project-title">${project.name}</h3>
                     <p class="project-author"><i class="fas fa-user-graduate"></i> ${project.author} • ${project.category}</p>
@@ -165,61 +166,74 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="vote-count"><i class="fas fa-heart"></i> ${project.votes} votos</span>
                         ${btnHtml}
                     </div>
-                    ${project.link ? `
-                        <a href="${project.link}" target="_blank" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">
-                            <i class="fas fa-external-link-alt"></i> Ver Projeto Completo
-                        </a>
-                    ` : ''}
+                    ${project.link ? `<a href="${project.link}" target="_blank" class="btn btn-outline" style="width: 100%; margin-top: 1rem;"><i class="fas fa-external-link-alt"></i> Ver Projeto Completo</a>` : ''}
                 </div>
             </div>
         `;
     }
 
+    // --- Carousel Logic ---
+    function initializeCarousels() {
+        const carousels = document.querySelectorAll('.carousel');
+        carousels.forEach(carousel => {
+            const items = carousel.querySelectorAll('.carousel-item');
+            const prevBtn = carousel.querySelector('.carousel-control.prev');
+            const nextBtn = carousel.querySelector('.carousel-control.next');
+            let currentIndex = 0;
+
+            function showItem(index) {
+                items.forEach((item, i) => {
+                    item.classList.toggle('active', i === index);
+                });
+            }
+
+            if(prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    currentIndex = (currentIndex - 1 + items.length) % items.length;
+                    showItem(currentIndex);
+                });
+            }
+
+            if(nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    currentIndex = (currentIndex + 1) % items.length;
+                    showItem(currentIndex);
+                });
+            }
+        });
+    }
+
     // --- Real-time Updates ---
     function subscribeToChanges() {
-        _supabase.channel('public:projects')
+        const channel = _supabase.channel('public-main-changes');
+        channel
             .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, loadProjects)
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, loadProjects)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, async () => {
+                await getUserVote(anonymousId, activeSession?.session_uuid);
+                loadProjects();
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, async () => {
+                showNotification('Uma nova sessão de votação começou!', 'info');
+                await initializeApp();
+            })
             .subscribe();
     }
 
-    // --- Modal Functions ---
-    function openAuthModal() {
-        if (authModal) authModal.classList.add('active');
-    }
-
-    function closeAuthModal() {
-        if (authModal) authModal.classList.remove('active');
-    }
-
-    // --- Event Listeners ---
-    loginBtn.addEventListener('click', openAuthModal);
-    logoutBtn.addEventListener('click', handleLogout);
-    googleLoginBtn.addEventListener('click', handleGoogleLogin);
-    
-    if (authModal) {
-        authModal.addEventListener('click', (e) => {
-            if (e.target === authModal) closeAuthModal();
-        });
-        authModal.querySelector('.close-modal').addEventListener('click', closeAuthModal);
-    }
-
     // --- Initialization ---
-    auth.onAuthStateChange(async (_event, session) => {
-        if (session && session.user) {
-            currentUser = session.user;
-            userProfile = await getProfile(currentUser.id);
-            closeAuthModal();
-        } else {
-            currentUser = null;
-            userProfile = null;
+    async function initializeApp() {
+        getOrSetAnonymousId();
+        const session = await fetchActiveSession();
+        if (session) {
+            await getUserVote(anonymousId, session.session_uuid);
+            await loadProjects();
         }
-        updateUI();
-    });
+        if (adminBtn) adminBtn.classList.remove('hidden');
+    }
 
+    initializeApp();
     updateCountdown();
     setInterval(updateCountdown, 60000);
-    subscribeToChanges(); // Inicia a escuta por atualizações em tempo real
+    subscribeToChanges();
 });
 
 // --- Notification System ---
@@ -234,17 +248,29 @@ function showNotification(message, type = 'info') {
         setTimeout(() => notification.remove(), 500);
     }, 3000);
 
-    // Adiciona a animação de slideOut se ela não existir
-    if (!document.styleSheets[0].cssRules.namedItem('slideOut')) {
-        try {
-            document.styleSheets[0].insertRule(`
-                @keyframes slideOut {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(110%); opacity: 0; }
+    try {
+        let ruleExists = false;
+        for (const sheet of document.styleSheets) {
+            try {
+                for (const rule of sheet.cssRules) {
+                    if (rule.name === 'slideOut') {
+                        ruleExists = true;
+                        break;
+                    }
                 }
-            `, document.styleSheets[0].cssRules.length);
-        } catch (e) {
-            console.warn("Não foi possível adicionar a regra de animação 'slideOut'.", e);
+            } catch (e) { /* Ignore CORS errors */ }
+            if (ruleExists) break;
         }
+
+        if (!ruleExists) {
+            for (const sheet of document.styleSheets) {
+                if (!sheet.href || sheet.href.startsWith(window.location.origin)) {
+                    sheet.insertRule(`@keyframes slideOut { from { transform: translateX(0); opacity: 0; } to { transform: translateX(110%); opacity: 0; } }`, sheet.cssRules.length);
+                    break;
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("Could not add slideOut animation rule.", e);
     }
 }

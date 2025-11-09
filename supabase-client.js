@@ -5,17 +5,22 @@
 // Importa as funções do Supabase a partir do CDN global
 const { createClient } = supabase;
 
-// URL e Chave Anônima do seu projeto Supabase
-const supabaseUrl = 'https://bciwrauxgdyaculyxkgu.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjaXdyYXV4Z2R5YWN1bHl4a2d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2NTQ4NDgsImV4cCI6MjA3ODIzMDg0OH0.TLXkZfQnmbBTJ5XxXQ3M8Xfwp5w3IjaPgy4rhkou98E';
+// As chaves são carregadas a partir do arquivo config.js (que não está no Git)
+const supabaseUrl = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : "";
+const supabaseKey = typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : "";
 
 // Cria e exporta o cliente Supabase para ser usado em outros arquivos
-const _supabase = createClient(supabaseUrl, supabaseKey);
+let _supabase;
 
-// Exemplo de como usar o cliente em outros arquivos:
-//
-// document.addEventListener('DOMContentLoaded', async () => {
-//     const { data: projects, error } = await _supabase.from('projects').select('*');
-//     if (error) console.error('Error fetching projects:', error);
-//     else console.log('Projects:', projects);
-// });
+if (supabaseUrl && supabaseKey) {
+    _supabase = createClient(supabaseUrl, supabaseKey);
+} else {
+    console.error("Supabase URL ou Key não encontradas. Verifique se o arquivo config.js está presente e configurado corretamente.");
+    // Exibe uma mensagem de erro na tela para o usuário final
+    document.body.innerHTML = `<div style="padding: 2rem; text-align: center; font-family: sans-serif;">
+        <h1>Erro de Configuração</h1>
+        <p>A conexão com o banco de dados não pôde ser estabelecida. As chaves do Supabase não foram encontradas.</p>
+        <p>Por favor, verifique o console para mais detalhes.</p>
+    </div>`;
+}
+

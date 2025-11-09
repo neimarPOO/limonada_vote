@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Limonada Summit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="index.html" class="logo">
+                <i class="fas fa-lemon"></i>
+                Limonada Summit
+            </a>
+            <div class="nav-buttons">
+                <span class="user-info hidden">
+                    <img src="" alt="User" id="userAvatar">
+                    <span id="userName"></span>
+                </span>
+                <a href="index.html" class="btn btn-outline">
+                    <i class="fas fa-vote-yea"></i>
+                    Ver Votação
+                </a>
+                <button class="btn btn-outline hidden" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sair
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Admin Area -->
+            <section class="admin-area" id="adminArea">
+                <div class="admin-header">
+                    <h2><i class="fas fa-cog"></i> Painel Administrativo</h2>
+                    <button class="btn btn-primary" id="addProjectBtn">
+                        <i class="fas fa-plus"></i>
+                        Novo Projeto
+                    </button>
+                </div>
+
+                <div class="admin-tabs">
+                    <button class="tab active" data-tab="dashboard">Dashboard</button>
+                    <button class="tab" data-tab="projects">Gerenciar Projetos</button>
+                    <button class="tab" data-tab="add">Adicionar/Editar Projeto</button>
+                    <button class="tab" data-tab="settings">Configurações</button>
+                </div>
+
+                <!-- Dashboard Content -->
+                <div class="tab-content active" id="dashboard">
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <span class="stat-value" id="totalProjects">0</span>
+                            <span class="stat-label">Total de Projetos</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="totalVotes">0</span>
+                            <span class="stat-label">Total de Votos</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="activeVoters">0</span>
+                            <span class="stat-label">Votantes Únicos</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="avgVotes">0</span>
+                            <span class="stat-label">Média de Votos/Projeto</span>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 2rem 0 1rem; color: var(--primary);">Ranking de Projetos</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>Posição</th>
+                                    <th>Projeto</th>
+                                    <th>Autor</th>
+                                    <th>Votos</th>
+                                    <th>% dos Votos</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rankingTable">
+                                <!-- Ranking will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Project Management Content -->
+                <div class="tab-content" id="projects">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">Gerenciar Projetos</h3>
+                    <div class="projects-grid" id="adminProjectsGrid">
+                        <!-- Admin project list -->
+                    </div>
+                </div>
+
+                <!-- Add/Edit Project Content -->
+                <div class="tab-content" id="add">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);" id="formTitle">Adicionar Novo Projeto</h3>
+                    <form id="projectForm">
+                        <input type="hidden" id="projectId">
+                        <div class="form-group">
+                            <label for="projectName">Nome do Projeto *</label>
+                            <input type="text" id="projectName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="projectAuthor">Nome do Aluno/Equipe *</label>
+                            <input type="text" id="projectAuthor" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="projectCategory">Categoria</label>
+                            <select id="projectCategory">
+                                <option value="Ciências">Ciências</option>
+                                <option value="Tecnologia">Tecnologia</option>
+                                <option value="Artes">Artes</option>
+                                <option value="Meio Ambiente">Meio Ambiente</option>
+                                <option value="Social">Social</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="projectDescription">Descrição do Projeto *</label>
+                            <textarea id="projectDescription" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="projectImage">URL da Imagem *</label>
+                            <input type="url" id="projectImage" required placeholder="https://exemplo.com/imagem.jpg">
+                        </div>
+                        <div class="form-group">
+                            <label for="projectLink">Link do Projeto (opcional)</label>
+                            <input type="url" id="projectLink" placeholder="https://exemplo.com/projeto">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Salvar Projeto
+                        </button>
+                        <button type="button" class="btn btn-outline" id="cancelEditBtn" style="display: none;">
+                            Cancelar Edição
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Settings Content -->
+                <div class="tab-content" id="settings">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">Configurações da Votação</h3>
+                    <div class="settings-card">
+                        <h4>Zerar Votação</h4>
+                        <p>Esta ação irá apagar todos os votos e registros de votantes. Os projetos não serão excluídos. <strong>Esta ação é irreversível.</strong></p>
+                        <button class="btn btn-accent" id="resetVotingBtn">
+                            <i class="fas fa-trash-alt"></i>
+                            Zerar Votação Agora
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

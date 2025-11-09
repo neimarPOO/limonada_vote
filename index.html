@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limonada Summit - Votação de Projetos Escolares</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                <i class="fas fa-lemon"></i>
+                Limonada Summit
+            </div>
+            <div class="nav-buttons">
+                <span class="user-info hidden">
+                    <img src="" alt="User" id="userAvatar">
+                    <span id="userName"></span>
+                </span>
+                <button class="btn btn-outline" id="loginBtn">
+                    <i class="fab fa-google"></i>
+                    Entrar
+                </button>
+                <a href="admin.html" class="btn btn-primary hidden" id="adminBtn">
+                    <i class="fas fa-cog"></i>
+                    Admin
+                </a>
+                <button class="btn btn-outline hidden" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sair
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Escolha o Melhor Projeto Escolar</h1>
+                <p>Participe da competição Limonada Summit e vote no projeto mais inovador. Sua opinião faz a diferença!</p>
+                <button class="btn btn-secondary btn-lg" onclick="document.getElementById('projects').scrollIntoView({behavior: 'smooth'})">
+                    <i class="fas fa-vote-yea"></i>
+                    Votar Agora
+                </button>
+            </div>
+        </section>
+
+        <div class="container">
+            <!-- Countdown -->
+            <div class="countdown">
+                <h3><i class="fas fa-clock"></i> Tempo Restante para Votar</h3>
+                <div class="timer" id="countdown">
+                    <div class="timer-item">
+                        <span class="timer-value" id="days">00</span>
+                        <span>Dias</span>
+                    </div>
+                    <div class="timer-item">
+                        <span class="timer-value" id="hours">00</span>
+                        <span>Horas</span>
+                    </div>
+                    <div class="timer-item">
+                        <span class="timer-value" id="minutes">00</span>
+                        <span>Minutos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Section -->
+            <section id="projects">
+                <div class="section-header">
+                    <h2>Projetos em Destaque</h2>
+                    <p>Conheça os projetos incríveis criados por nossos jovens talentos</p>
+                </div>
+                <div class="projects-grid" id="projectsGrid">
+                    <!-- Projects will be loaded here by main.js -->
+                </div>
+            </section>
+
+            <!-- How It Works -->
+            <section class="how-it-works">
+                <div class="section-header">
+                    <h2>Como Funciona</h2>
+                    <p>Siga estes simples passos para participar da votação</p>
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Faça Login</h3>
+                        <p>Entre com sua conta Google de forma rápida e segura</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Explore Projetos</h3>
+                        <p>Veja todos os projetos e conheça as ideias inovadoras</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Vote</h3>
+                        <p>Escolha seu projeto favorito e vote (apenas 1 voto por usuário)</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>Acompanhe</h3>
+                        <p>Acompanhe o ranking em tempo real até o final da votação</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="logo" style="color: white;">
+                <i class="fas fa-lemon"></i>
+                Limonada Summit 2024
+            </div>
+            <p style="margin: 1rem 0;">Incentivando a criatividade e inovação dos jovens talentos</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                <i class="fas fa-lock"></i> Votação segura • Dados protegidos • Transparência total
+            </p>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Entrar com Google</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <p style="margin-bottom: 1.5rem; color: var(--text-light);">
+                Faça login com sua conta Google para votar nos projetos
+            </p>
+            <button id="googleLoginBtn" class="btn btn-primary" style="width: 100%;">
+                <i class="fab fa-google"></i>
+                Continuar com Google
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

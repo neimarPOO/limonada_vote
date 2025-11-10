@@ -4,7 +4,7 @@
   # Este comando será executado no momento do build no Netlify.
   # Ele pega as variáveis de ambiente configuradas na UI do Netlify
   # e as usa para criar o arquivo config.js que será publicado com o site.
-  command = "echo 'const SUPABASE_URL = \"'${SUPABASE_URL}'\"; const SUPABASE_KEY = \"'${SUPABASE_KEY}'\"; const ADMIN_PASSWORD = \"'${ADMIN_PASSWORD}'\";' > config.js"
+  command = "printf 'const SUPABASE_URL = \"%s\"; const SUPABASE_KEY = \"%s\"; const ADMIN_PASSWORD = \"%s\";' \"$SUPABASE_URL\" \"$SUPABASE_KEY\" \"$ADMIN_PASSWORD\" > config.js"
   
   # O diretório que o Netlify irá publicar. Como é um site estático simples,
   # publicamos a partir da raiz do projeto.

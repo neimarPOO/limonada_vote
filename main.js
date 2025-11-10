@@ -124,17 +124,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Project Loading & UI ---
     async function loadProjects() {
-        if (!activeSession) {
-            console.log("Nenhuma sessão ativa para carregar projetos.");
-            return;
-        }
-        const { data: projects, error } = await _supabase.from('projects_with_votes').select('*').order('votes', { ascending: false });
-        if (error) {
-            console.error('Erro ao carregar projetos:', error);
+        // 1. Busca todos os projetos, garantindo que sempre sejam exibidos.
+        const { data: projects, error: projectsError } = await _supabase.from('projects').select('*').order('created_at', { ascending: false });
+
+        if (projectsError) {
+            console.error('Erro ao carregar projetos:', projectsError);
             projectsGrid.innerHTML = '<p class="error-message">Não foi possível carregar os projetos.</p>';
             return;
         }
-        projectsGrid.innerHTML = projects.map(project => createProjectCard(project, userVoteInSession)).join('');
+
+        if (!projects || projects.length === 0) {
+            projectsGrid.innerHTML = '<p class="error-message">Nenhum projeto cadastrado ainda.</p>';
+            return;
+        }
+
+        // 2. Busca os votos da sessão ativa, se houver.
+        let votesMap = new Map();
+        if (activeSession) {
+            const { data: votes, error: votesError } = await _supabase
+                .from('votes')
+                .select('project_id')
+                .eq('session_uuid', activeSession.session_uuid);
+
+            if (votesError) {
+                console.error('Erro ao carregar votos:', votesError);
+            } else {
+                // Cria um mapa de contagem de votos (projectId -> voteCount)
+                for (const vote of votes) {
+                    votesMap.set(vote.project_id, (votesMap.get(vote.project_id) || 0) + 1);
+                }
+            }
+        }
+
+        // 3. Combina os projetos com seus votos.
+        const projectsWithVotes = projects.map(project => ({
+            ...project,
+            votes: votesMap.get(project.id) || 0
+        }));
+
+        // Ordena os projetos pela contagem de votos
+        projectsWithVotes.sort((a, b) => b.votes - a.votes);
+
+        projectsGrid.innerHTML = projectsWithVotes.map(project => createProjectCard(project, userVoteInSession)).join('');
         initializeCarousels(); // Ativa a lógica dos carrosséis
     }
 

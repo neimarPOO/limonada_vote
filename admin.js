@@ -102,7 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         async function loadAdminProjects() {
-            const { data: projects, error } = await _supabase.from('projects_with_votes').select('*').order('created_at', { ascending: false });
+            // Busca direto da tabela de projetos para garantir que todos apareçam sempre.
+            const { data: projects, error } = await _supabase.from('projects').select('*').order('created_at', { ascending: false });
             if (error) {
                 console.error("Erro ao carregar projetos para admin:", error);
                 return;
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="project-content">
                         <h3 class="project-title">${project.name}</h3>
                         <p class="project-author"><i class="fas fa-user-graduate"></i> ${project.author} • ${project.category}</p>
-                        <div class="project-footer"><span class="vote-count"><i class="fas fa-heart"></i> ${project.votes} votos</span></div>
+                        <div class="project-footer"><span class="vote-count">ID: ${project.id}</span></div>
                         <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
                             <button class="btn btn-primary" style="flex: 1;" onclick="window.editProject(${project.id})"><i class="fas fa-edit"></i> Editar</button>
                             <button class="btn btn-outline" style="flex: 1;" onclick="window.deleteProject(${project.id})"><i class="fas fa-trash"></i> Excluir</button>

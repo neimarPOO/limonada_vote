@@ -62,26 +62,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Data Fetching ---
     async function fetchActiveSession() {
-        // Pega a sessão ativa mais recente para evitar erros caso haja múltiplas sessões ativas.
+        // Pega a sessão ativa mais recente. Trata o resultado como um array para evitar o erro 406.
         const { data, error } = await _supabase
             .from('sessions')
             .select('session_uuid, ends_at')
             .eq('is_active', true)
             .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
+            .limit(1);
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 = "exact one row not found"
+        if (error) {
             console.error('Erro ao buscar sessão ativa:', error);
             projectsGrid.innerHTML = '<p class="error-message">Não foi possível determinar a sessão de votação.</p>';
             return null;
         }
-        if (!data) {
+
+        const session = (data && data.length > 0) ? data[0] : null;
+
+        if (!session) {
             projectsGrid.innerHTML = '<p class="error-message">Nenhuma votação em andamento. Volte mais tarde!</p>';
         }
-        activeSession = data;
+        
+        activeSession = session;
         updateCountdown(); // Update countdown as soon as session is fetched
-        return data;
+        return session;
     }
 
     async function getUserVote(userId, sessionUUID) {

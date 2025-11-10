@@ -315,11 +315,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                                                                         .replace(/[^a-zA-Z0-9-._]/g, '') // Remove caracteres especiais, exceto hífens, underscores e pontos
 
-                                                                                        .toLowerCase(); // Opcional: converte para minúsculas para consistência
+                                                                                                                                                .toLowerCase(); // Opcional: converte para minúsculas para consistência
 
-                                                        const pdfFilePath = `public/${Date.now()}-${cleanedFileName}`;
+                                                                                                        const pdfFilePath = `${Date.now()}-${cleanedFileName}`; // Removido o prefixo 'public/'
 
-                                                        const { error: pdfUploadError } = await _supabase.storage.from('project-pdfs').upload(pdfFilePath, newPdfFile);
+                                                                                                        const { error: pdfUploadError } = await _supabase.storage.from('project-pdfs').upload(pdfFilePath, newPdfFile);
 
                         if (pdfUploadError) {
 
@@ -337,23 +337,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         
 
-                    const projectData = {
+                                        const projectData = {
 
-                        name: projectForm.elements.projectName.value,
+        
 
-                        author: projectForm.elements.projectAuthor.value,
+                                            name: projectForm.elements.projectName.value,
 
-                        category: projectForm.elements.projectCategory.value,
+        
 
-                        description: projectForm.elements.projectDescription.value,
+                                            author: projectForm.elements.projectAuthor.value,
 
-                        link: projectForm.elements.projectLink.value,
+        
 
-                        image: finalImageUrls.length > 0 ? finalImageUrls : null,
+                                            category: projectForm.elements.projectCategory.value,
 
-                        pdf_url: finalPdfUrl || null,
+        
 
-                    };
+                                            description: projectForm.elements.projectDescription.value || null, // Garante que a descrição seja salva
+
+        
+
+                                            link: projectForm.elements.projectLink.value || null, // Garante que o link seja salvo
+
+        
+
+                                            image: finalImageUrls.length > 0 ? finalImageUrls : null,
+
+        
+
+                                            pdf_url: finalPdfUrl || null,
+
+        
+
+                                        };
 
         
 

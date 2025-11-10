@@ -773,6 +773,16 @@ footer {
     filter: none;
 }
 
+.session-duration-inputs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.session-duration-inputs .form-group {
+    flex: 1;
+}
+
 
 /* Settings */
 .settings-card {
@@ -840,6 +850,36 @@ footer {
     .ranking-table th,
     .ranking-table td {
         padding: 0.75rem 0.5rem;
+    }
+
+    .ranking-table {
+        display: block;
+    }
+    .ranking-table thead {
+        display: none; /* Oculta os cabeçalhos em telas pequenas */
+    }
+    .ranking-table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 1rem;
+    }
+    .ranking-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px dotted var(--border);
+    }
+    .ranking-table td:last-child {
+        border-bottom: none;
+    }
+    .ranking-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text);
     }
 
     .footer-content {
@@ -996,6 +1036,34 @@ footer {
 
 .remove-image-btn:hover {
     transform: scale(1.1);
+}
+
+.pdf-preview {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    background: var(--background);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.pdf-preview .fa-file-pdf {
+    color: var(--accent);
+    margin-right: 0.5rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    width: 100%;
+}
+
+.card-actions .btn {
+    flex: 1;
+    justify-content: center;
 }
 
 /* --- Carousel Styles --- */

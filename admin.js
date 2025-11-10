@@ -87,12 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'rank-other';
                 return `
                     <tr>
-                        <td><div class="rank-badge ${rankClass}">${index + 1}</div></td>
-                        <td><strong>${project.name}</strong><br><small>${project.category}</small></td>
-                        <td>${project.author}</td>
-                        <td><span style="font-weight: 700; color: var(--primary);"><i class="fas fa-heart"></i> ${project.votes}</span></td>
-                        <td>${percentage}%</td>
-                        <td>
+                        <td data-label="Rank"><div class="rank-badge ${rankClass}">${index + 1}</div></td>
+                        <td data-label="Projeto"><strong>${project.name}</strong><br><small>${project.category}</small></td>
+                        <td data-label="Autor">${project.author}</td>
+                        <td data-label="Votos"><span style="font-weight: 700; color: var(--primary);"><i class="fas fa-heart"></i> ${project.votes}</span></td>
+                        <td data-label="%">${percentage}%</td>
+                        <td data-label="Ações">
                             <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;" onclick="window.editProject(${project.id})"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;" onclick="window.deleteProject(${project.id})"><i class="fas fa-trash"></i></button>
                         </td>
@@ -151,208 +151,594 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification('Editando projeto. Enviar novos arquivos substituirá TODAS as imagens atuais.', 'info');
         };
 
-        window.deleteProject = async (projectId) => {
-            if (!confirm('Tem certeza que deseja excluir este projeto? Esta ação é irreversível.')) return;
-            
-            // Primeiro, pegue as URLs das imagens para deletá-las do storage
-            const { data: project, error: fetchError } = await _supabase.from('projects').select('image').eq('id', projectId).single();
-            if (fetchError) {
-                showNotification('Erro ao buscar dados do projeto para exclusão.', 'error');
-                return;
-            }
+                window.deleteProject = async (projectId) => {
 
-            // Deleta o projeto do banco de dados
-            const { error: deleteError } = await _supabase.from('projects').delete().eq('id', projectId);
-            if (deleteError) {
-                showNotification('Erro ao excluir projeto: ' + deleteError.message, 'error');
-                return;
-            }
+                    if (!confirm('Tem certeza que deseja excluir este projeto? Esta ação é irreversível.')) return;
 
-            // Se o projeto foi deletado, apague as imagens do storage
-            if (project.image && project.image.length > 0) {
-                const filePaths = project.image.map(url => new URL(url).pathname.split('/project-images/')[1]);
-                await _supabase.storage.from('project-images').remove(filePaths);
-            }
+                    
 
-            showNotification('Projeto excluído com sucesso!', 'success');
-        };
+                    // Primeiro, pegue as URLs dos arquivos para deletá-los do storage
 
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            showNotification('Salvando projeto...', 'info');
+                    const { data: project, error: fetchError } = await _supabase.from('projects').select('image, pdf_url').eq('id', projectId).single();
 
-            const editingId = projectForm.elements.projectId.value;
-            const newFiles = projectForm.elements.projectImageFile.files;
-            let existingUrls = projectForm.elements.existingImageUrls.value ? JSON.parse(projectForm.elements.existingImageUrls.value) : [];
-            let finalImageUrls = [...existingUrls];
+                    if (fetchError) {
 
-            if (newFiles.length > 0) {
-                // Se há novos arquivos, substitui os antigos.
-                // 1. Deleta as imagens antigas do storage
-                if (existingUrls.length > 0) {
-                    const oldFilePaths = existingUrls.map(url => new URL(url).pathname.split('/project-images/')[1]);
-                    await _supabase.storage.from('project-images').remove(oldFilePaths);
+                        showNotification('Erro ao buscar dados do projeto para exclusão.', 'error');
+
+                        return;
+
+                    }
+
+        
+
+                    // Deleta o projeto do banco de dados
+
+                    const { error: deleteError } = await _supabase.from('projects').delete().eq('id', projectId);
+
+                    if (deleteError) {
+
+                        showNotification('Erro ao excluir projeto: ' + deleteError.message, 'error');
+
+                        return;
+
+                    }
+
+        
+
+                    // Se o projeto foi deletado, apague os arquivos do storage
+
+                    if (project.image && project.image.length > 0) {
+
+                        const filePaths = project.image.map(url => new URL(url).pathname.split('/project-images/')[1]);
+
+                        await _supabase.storage.from('project-images').remove(filePaths);
+
+                    }
+
+                    if (project.pdf_url) {
+
+                        const pdfPath = new URL(project.pdf_url).pathname.split('/project-pdfs/')[1];
+
+                        await _supabase.storage.from('project-pdfs').remove([pdfPath]);
+
+                    }
+
+        
+
+                    showNotification('Projeto excluído com sucesso!', 'success');
+
+                };
+
+        
+
+                async function handleFormSubmit(e) {
+
+                    e.preventDefault();
+
+                    showNotification('Salvando projeto...', 'info');
+
+        
+
+                    const editingId = projectForm.elements.projectId.value;
+
+                    
+
+                    // --- Lógica de Upload de Imagem ---
+
+                    const newImageFiles = projectForm.elements.projectImageFile.files;
+
+                    let existingImageUrls = projectForm.elements.existingImageUrls.value ? JSON.parse(projectForm.elements.existingImageUrls.value) : [];
+
+                    let finalImageUrls = [...existingImageUrls];
+
+        
+
+                    if (newImageFiles.length > 0) {
+
+                        if (existingImageUrls.length > 0) {
+
+                            const oldFilePaths = existingImageUrls.map(url => new URL(url).pathname.split('/project-images/')[1]);
+
+                            await _supabase.storage.from('project-images').remove(oldFilePaths);
+
+                        }
+
+                        finalImageUrls = [];
+
+                        const uploadPromises = Array.from(newImageFiles).map(async (file) => {
+
+                            const filePath = `public/${Date.now()}-${file.name}`;
+
+                            const { error: uploadError } = await _supabase.storage.from('project-images').upload(filePath, file);
+
+                            if (uploadError) throw uploadError;
+
+                            const { data: urlData } = _supabase.storage.from('project-images').getPublicUrl(filePath);
+
+                            return urlData.publicUrl;
+
+                        });
+
+                        try {
+
+                            finalImageUrls = await Promise.all(uploadPromises);
+
+                        } catch (error) {
+
+                            showNotification('Erro no upload de imagens: ' + error.message, 'error');
+
+                            return;
+
+                        }
+
+                    }
+
+        
+
+                    // --- Lógica de Upload de PDF ---
+
+                    const newPdfFile = projectForm.elements.projectPdfFile.files[0];
+
+                    let existingPdfUrl = projectForm.elements.existingPdfUrl.value;
+
+                    let finalPdfUrl = existingPdfUrl;
+
+        
+
+                    if (newPdfFile) {
+
+                        if (existingPdfUrl) {
+
+                            const oldPdfPath = new URL(existingPdfUrl).pathname.split('/project-pdfs/')[1];
+
+                            await _supabase.storage.from('project-pdfs').remove([oldPdfPath]);
+
+                        }
+
+                        const pdfFilePath = `public/${Date.now()}-${newPdfFile.name}`;
+
+                        const { error: pdfUploadError } = await _supabase.storage.from('project-pdfs').upload(pdfFilePath, newPdfFile);
+
+                        if (pdfUploadError) {
+
+                            showNotification('Erro no upload do PDF: ' + pdfUploadError.message, 'error');
+
+                            return;
+
+                        }
+
+                        const { data: pdfUrlData } = _supabase.storage.from('project-pdfs').getPublicUrl(pdfFilePath);
+
+                        finalPdfUrl = pdfUrlData.publicUrl;
+
+                    }
+
+        
+
+                    const projectData = {
+
+                        name: projectForm.elements.projectName.value,
+
+                        author: projectForm.elements.projectAuthor.value,
+
+                        category: projectForm.elements.projectCategory.value,
+
+                        description: projectForm.elements.projectDescription.value,
+
+                        link: projectForm.elements.projectLink.value,
+
+                        image: finalImageUrls.length > 0 ? finalImageUrls : null,
+
+                        pdf_url: finalPdfUrl || null,
+
+                    };
+
+        
+
+                    const { error } = editingId
+
+                        ? await _supabase.from('projects').update(projectData).eq('id', editingId)
+
+                        : await _supabase.from('projects').insert(projectData);
+
+        
+
+                    if (error) {
+
+                        showNotification('Erro ao salvar projeto: ' + error.message, 'error');
+
+                    } else {
+
+                        showNotification(`Projeto ${editingId ? 'atualizado' : 'adicionado'} com sucesso!`, 'success');
+
+                        resetForm();
+
+                        switchTab('dashboard');
+
+                    }
+
                 }
 
-                // 2. Faz upload das novas imagens
-                finalImageUrls = []; // Zera a lista para preencher com as novas
-                const uploadPromises = Array.from(newFiles).map(async (file) => {
-                    const filePath = `public/${Date.now()}-${file.name}`;
-                    const { error: uploadError } = await _supabase.storage.from('project-images').upload(filePath, file);
-                    if (uploadError) throw uploadError;
-                    const { data: urlData } = _supabase.storage.from('project-images').getPublicUrl(filePath);
-                    return urlData.publicUrl;
+        
+
+                function resetForm() {
+
+                    formTitle.textContent = 'Adicionar Novo Projeto';
+
+                    projectForm.reset();
+
+                    projectForm.elements.projectId.value = '';
+
+                    projectForm.elements.existingImageUrls.value = '';
+
+                    projectForm.elements.existingPdfUrl.value = '';
+
+                    imagePreviewContainer.innerHTML = '';
+
+                    document.getElementById('pdfPreview').innerHTML = '';
+
+                    cancelEditBtn.style.display = 'none';
+
+                }
+
+                
+
+                function updateImagePreview(sources) {
+
+                    imagePreviewContainer.innerHTML = '';
+
+                    sources.forEach(src => {
+
+                        const previewItem = document.createElement('div');
+
+                        previewItem.className = 'image-preview-item';
+
+                        const img = document.createElement('img');
+
+                        img.src = src;
+
+                        previewItem.appendChild(img);
+
+                        imagePreviewContainer.appendChild(previewItem);
+
+                    });
+
+                }
+
+        
+
+                function updatePdfPreview(pdfUrl) {
+
+                    const pdfPreview = document.getElementById('pdfPreview');
+
+                    if (pdfUrl) {
+
+                        const fileName = pdfUrl.split('/').pop();
+
+                        pdfPreview.innerHTML = `<i class="fas fa-file-pdf"></i> ${fileName.substring(fileName.indexOf('-') + 1)}`;
+
+                    } else {
+
+                        pdfPreview.innerHTML = '';
+
+                    }
+
+                }
+
+        
+
+                        // --- Settings ---
+
+        
+
+                        async function handleStartNewVoting(e) {
+
+        
+
+                            e.preventDefault();
+
+        
+
+                            if (!confirm('ATENÇÃO!\n\nVocê está prestes a iniciar uma NOVA sessão de votação.')) return;
+
+        
+
+                
+
+        
+
+                            const days = parseInt(document.getElementById('session_days').value) || 0;
+
+        
+
+                            const hours = parseInt(document.getElementById('session_hours').value) || 0;
+
+        
+
+                            const minutes = parseInt(document.getElementById('session_minutes').value) || 0;
+
+        
+
+                
+
+        
+
+                            const totalMilliseconds = (days * 24 * 60 * 60 * 1000) + (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+
+        
+
+                
+
+        
+
+                            if (totalMilliseconds <= 0) {
+
+        
+
+                                showNotification('A duração da sessão deve ser maior que zero.', 'error');
+
+        
+
+                                return;
+
+        
+
+                            }
+
+        
+
+                
+
+        
+
+                            const ends_at = new Date(Date.now() + totalMilliseconds).toISOString();
+
+        
+
+                
+
+        
+
+                            await _supabase.from('sessions').update({ is_active: false }).eq('is_active', true);
+
+        
+
+                            const { error } = await _supabase.from('sessions').insert({ ends_at });
+
+        
+
+                            if (error) showNotification('Erro ao criar nova sessão: ' + error.message, 'error');
+
+        
+
+                            else showNotification('Nova sessão de votação iniciada com sucesso!', 'success');
+
+        
+
+                        }
+
+        
+
+                
+
+        
+
+                        // --- Tab Navigation & Event Listeners ---
+
+        
+
+                        function switchTab(tabName) {
+
+        
+
+                            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+        
+
+                            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        
+
+                            const tabButton = document.querySelector(`.tab[data-tab="${tabName}"]`);
+
+        
+
+                            const tabContent = document.getElementById(tabName);
+
+        
+
+                            if (tabButton) tabButton.classList.add('active');
+
+        
+
+                            if (tabContent) tabContent.classList.add('active');
+
+        
+
+                        }
+
+        
+
+                
+
+        
+
+                        projectForm.addEventListener('submit', handleFormSubmit);
+
+        
+
+                        cancelEditBtn.addEventListener('click', resetForm);
+
+        
+
+                        document.getElementById('newSessionForm').addEventListener('submit', handleStartNewVoting);
+
+        
+
+                        
+
+        
+
+                        document.querySelector('.admin-tabs').addEventListener('click', (e) => {
+
+        
+
+                            if (e.target.matches('.tab')) {
+
+        
+
+                                const tabName = e.target.dataset.tab;
+
+                        if (tabName === 'add') resetForm();
+
+                        switchTab(tabName);
+
+                    }
+
                 });
 
-                try {
-                    finalImageUrls = await Promise.all(uploadPromises);
-                } catch (error) {
-                    showNotification('Erro no upload de uma ou mais imagens: ' + error.message, 'error');
-                    return;
-                }
-            }
-
-            if (finalImageUrls.length === 0) {
-                showNotification('Nenhuma imagem fornecida. Por favor, envie ao menos um arquivo.', 'error');
-                return;
-            }
-
-            const projectData = {
-                name: projectForm.elements.projectName.value,
-                author: projectForm.elements.projectAuthor.value,
-                category: projectForm.elements.projectCategory.value,
-                description: projectForm.elements.projectDescription.value,
-                link: projectForm.elements.projectLink.value,
-                image: finalImageUrls, // Salva o array de URLs
-            };
-
-            const { error } = editingId
-                ? await _supabase.from('projects').update(projectData).eq('id', editingId)
-                : await _supabase.from('projects').insert(projectData);
-
-            if (error) {
-                showNotification('Erro ao salvar projeto: ' + error.message, 'error');
-            }
-            else {
-                showNotification(`Projeto ${editingId ? 'atualizado' : 'adicionado'} com sucesso!`, 'success');
-                resetForm();
-                switchTab('dashboard');
-            }
-        }
-
-        function resetForm() {
-            formTitle.textContent = 'Adicionar Novo Projeto';
-            projectForm.reset();
-            projectForm.elements.projectId.value = '';
-            projectForm.elements.existingImageUrls.value = '';
-            imagePreviewContainer.innerHTML = '';
-            cancelEditBtn.style.display = 'none';
-        }
         
-        function updateImagePreview(sources) {
-            imagePreviewContainer.innerHTML = '';
-            sources.forEach(src => {
-                const previewItem = document.createElement('div');
-                previewItem.className = 'image-preview-item';
-                const img = document.createElement('img');
-                img.src = src;
-                previewItem.appendChild(img);
-                imagePreviewContainer.appendChild(previewItem);
-            });
-        }
 
-        // --- Settings ---
-        async function handleStartNewVoting() {
-            if (!confirm('ATENÇÃO!\n\nVocê está prestes a iniciar uma NOVA sessão de votação.')) return;
-            await _supabase.from('sessions').update({ is_active: false }).eq('is_active', true);
-            const { error } = await _supabase.from('sessions').insert({});
-            if (error) showNotification('Erro ao criar nova sessão: ' + error.message, 'error');
-            else showNotification('Nova sessão de votação iniciada com sucesso!', 'success');
-        }
+                projectImageFile.addEventListener('change', () => {
 
-        // --- Tab Navigation & Event Listeners ---
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            const tabButton = document.querySelector(`.tab[data-tab="${tabName}"]`);
-            const tabContent = document.getElementById(tabName);
-            if (tabButton) tabButton.classList.add('active');
-            if (tabContent) tabContent.classList.add('active');
-        }
+                    const files = Array.from(projectImageFile.files);
 
-        projectForm.addEventListener('submit', handleFormSubmit);
-        cancelEditBtn.addEventListener('click', resetForm);
-        resetVotingBtn.addEventListener('click', handleStartNewVoting);
+                    const fileUrls = files.map(file => URL.createObjectURL(file));
+
+                    updateImagePreview(fileUrls);
+
+                });
+
         
-        document.querySelector('.admin-tabs').addEventListener('click', (e) => {
-            if (e.target.matches('.tab')) {
-                const tabName = e.target.dataset.tab;
-                if (tabName === 'add') resetForm();
-                switchTab(tabName);
-            }
-        });
 
-        projectImageFile.addEventListener('change', () => {
-            const files = Array.from(projectImageFile.files);
-            const fileUrls = files.map(file => URL.createObjectURL(file));
-            updateImagePreview(fileUrls);
-        });
+                document.getElementById('projectPdfFile').addEventListener('change', (e) => {
 
-        // --- Real-time Subscriptions & Initial Load ---
-        function subscribeToChanges() {
-            _supabase.channel('public-admin-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => { loadDashboard(); loadAdminProjects(); })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, loadDashboard)
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, loadDashboard)
-                .subscribe();
-        }
+                    const file = e.target.files[0];
 
-        loadDashboard();
-        loadAdminProjects();
-        subscribeToChanges();
-    }
-});
+                    if (file) {
 
-// --- Notification System ---
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}`;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.5s ease forwards';
-        setTimeout(() => notification.remove(), 500);
-    }, 3000);
+                        updatePdfPreview(file.name);
 
-    try {
-        // Check if the rule already exists to avoid re-inserting
-        let ruleExists = false;
-        for (const sheet of document.styleSheets) {
-            // Wrap rule access in another try-catch for cross-origin sheets
-            try {
-                for (const rule of sheet.cssRules) {
-                    if (rule.name === 'slideOut') {
-                        ruleExists = true;
-                        break;
                     }
+
+                });
+
+        
+
+                // --- Real-time Subscriptions & Initial Load ---
+
+                function subscribeToChanges() {
+
+                    _supabase.channel('public-admin-changes')
+
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => { loadDashboard(); loadAdminProjects(); })
+
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, loadDashboard)
+
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, loadDashboard)
+
+                        .subscribe();
+
                 }
-            } catch (e) {
-                // Ignore CORS errors on foreign stylesheets
+
+        
+
+                loadDashboard();
+
+                loadAdminProjects();
+
+                subscribeToChanges();
+
             }
-            if (ruleExists) break;
+
+        });
+
+        
+
+        // --- Notification System ---
+
+        function showNotification(message, type = 'info') {
+
+            const notification = document.createElement('div');
+
+            notification.className = `notification ${type}`;
+
+            notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}`;
+
+            document.body.appendChild(notification);
+
+            
+
+            setTimeout(() => {
+
+                notification.style.animation = 'slideOut 0.5s ease forwards';
+
+                setTimeout(() => notification.remove(), 500);
+
+            }, 3000);
+
+        
+
+            try {
+
+                // Check if the rule already exists to avoid re-inserting
+
+                let ruleExists = false;
+
+                for (const sheet of document.styleSheets) {
+
+                    // Wrap rule access in another try-catch for cross-origin sheets
+
+                    try {
+
+                        for (const rule of sheet.cssRules) {
+
+                            if (rule.name === 'slideOut') {
+
+                                ruleExists = true;
+
+                                break;
+
+                            }
+
+                        }
+
+                    } catch (e) {
+
+                        // Ignore CORS errors on foreign stylesheets
+
+                    }
+
+                    if (ruleExists) break;
+
+                }
+
+        
+
+                if (!ruleExists) {
+
+                    // Find the first local stylesheet to insert the rule
+
+                    for (const sheet of document.styleSheets) {
+
+                        if (!sheet.href || sheet.href.startsWith(window.location.origin)) {
+
+                            sheet.insertRule(`@keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(110%); opacity: 0; } }`, sheet.cssRules.length);
+
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+            } catch (e) {
+
+                console.warn("Could not add slideOut animation rule.", e);
+
+            }
+
         }
 
-        if (!ruleExists) {
-            // Find the first local stylesheet to insert the rule
-            for (const sheet of document.styleSheets) {
-                if (!sheet.href || sheet.href.startsWith(window.location.origin)) {
-                    sheet.insertRule(`@keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(110%); opacity: 0; } }`, sheet.cssRules.length);
-                    break;
-                }
-            }
-        }
-    } catch (e) {
-        console.warn("Could not add slideOut animation rule.", e);
-    }
-}
+        

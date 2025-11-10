@@ -108,6 +108,12 @@
                                     <input type="hidden" name="existingImageUrls">
                                 </div>
                                 <div class="form-group full-width">
+                                    <label for="projectPdfFile">PDF do Projeto (Opcional)</label>
+                                    <input type="file" id="projectPdfFile" name="projectPdfFile" accept=".pdf">
+                                    <span id="pdfPreview" class="pdf-preview"></span>
+                                    <input type="hidden" name="existingPdfUrl">
+                                </div>
+                                <div class="form-group full-width">
                                     <label for="projectDescription">Descrição Curta</label>
                                     <textarea id="projectDescription" name="projectDescription" rows="3" required></textarea>
                                 </div>
@@ -129,15 +135,30 @@
                         <h3><i class="fas fa-cogs"></i> Configurações da Votação</h3>
                         <p>Ações perigosas que afetam toda a competição.</p>
                         <div class="danger-zone">
-                            <h4>Iniciar Nova Sessão de Votação</h4>
-                            <p>
-                                Esta ação irá arquivar a sessão de votação atual e iniciar uma nova.
-                                Todos os votos da sessão anterior serão mantidos, mas a contagem para a nova competição será zerada.
-                                Use isso para começar uma nova rodada de votação.
-                            </p>
-                            <button id="resetVotingBtn" class="btn btn-danger">
-                                <i class="fas fa-rocket"></i> Iniciar Nova Votação
-                            </button>
+                            <form id="newSessionForm">
+                                <h4>Iniciar Nova Sessão de Votação</h4>
+                                <p>
+                                    Esta ação irá arquivar a sessão de votação atual e iniciar uma nova com a duração especificada.
+                                    Todos os votos da sessão anterior serão mantidos, mas a contagem para a nova competição será zerada.
+                                </p>
+                                <div class="session-duration-inputs">
+                                    <div class="form-group">
+                                        <label for="session_days">Dias</label>
+                                        <input type="number" id="session_days" value="1" min="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="session_hours">Horas</label>
+                                        <input type="number" id="session_hours" value="0" min="0" max="23">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="session_minutes">Minutos</label>
+                                        <input type="number" id="session_minutes" value="0" min="0" max="59">
+                                    </div>
+                                </div>
+                                <button type="submit" id="startNewVotingBtn" class="btn btn-danger">
+                                    <i class="fas fa-rocket"></i> Iniciar Nova Votação
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

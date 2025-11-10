@@ -33,9 +33,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Countdown Timer ---
     function updateCountdown() {
-        if (!countdownEl) return;
-        const endDate = new Date();
-        endDate.setHours(endDate.getHours() + 1);
+        if (!countdownEl || !activeSession || !activeSession.ends_at) {
+            if(document.getElementById('days')) document.getElementById('days').textContent = '00';
+            if(document.getElementById('hours')) document.getElementById('hours').textContent = '00';
+            if(document.getElementById('minutes')) document.getElementById('minutes').textContent = '00';
+            return;
+        }
+
+        const endDate = new Date(activeSession.ends_at).getTime();
         const now = new Date().getTime();
         const distance = endDate - now;
 
@@ -57,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Data Fetching ---
     async function fetchActiveSession() {
-        const { data, error } = await _supabase.from('sessions').select('session_uuid').eq('is_active', true).single();
+        const { data, error } = await _supabase.from('sessions').select('session_uuid, ends_at').eq('is_active', true).single();
         if (error && error.code !== 'PGRST116') {
             console.error('Erro ao buscar sessão ativa:', error);
             projectsGrid.innerHTML = '<p class="error-message">Não há uma votação ativa no momento.</p>';
@@ -67,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             projectsGrid.innerHTML = '<p class="error-message">Nenhuma votação em andamento. Volte mais tarde!</p>';
         }
         activeSession = data;
+        updateCountdown(); // Update countdown as soon as session is fetched
         return data;
     }
 
@@ -176,7 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="vote-count"><i class="fas fa-heart"></i> ${project.votes} votos</span>
                         ${btnHtml}
                     </div>
-                    ${project.link ? `<a href="${project.link}" target="_blank" class="btn btn-outline" style="width: 100%; margin-top: 1rem;"><i class="fas fa-external-link-alt"></i> Ver Projeto Completo</a>` : ''}
+                    <div class="card-actions">
+                        ${project.link ? `<a href="${project.link}" target="_blank" class="btn btn-outline"><i class="fas fa-external-link-alt"></i> Ver Projeto</a>` : ''}
+                        ${project.pdf_url ? `<a href="${project.pdf_url}" target="_blank" class="btn btn-secondary"><i class="fas fa-file-pdf"></i> Baixar PDF</a>` : ''}
+                    </div>
                 </div>
             </div>
         `;

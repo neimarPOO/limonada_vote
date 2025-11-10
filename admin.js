@@ -315,23 +315,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                                                                         .replace(/[^a-zA-Z0-9-._]/g, '') // Remove caracteres especiais, exceto hífens, underscores e pontos
 
-                                                                                                                                                .toLowerCase(); // Opcional: converte para minúsculas para consistência
+                                                                                                                                                                                                        .toLowerCase(); // Opcional: converte para minúsculas para consistência
 
-                                                                                                        const pdfFilePath = `${Date.now()}-${cleanedFileName}`; // Removido o prefixo 'public/'
+                                                                                                                                                                const pdfFilePath = `${Date.now()}-${cleanedFileName}`; // Removido o prefixo 'public/'
 
-                                                                                                        const { error: pdfUploadError } = await _supabase.storage.from('project-pdfs').upload(pdfFilePath, newPdfFile);
+                                                                                                                                                                const { error: pdfUploadError } = await _supabase.storage.from('project-pdfs').upload(pdfFilePath, newPdfFile);
 
-                        if (pdfUploadError) {
+                                                                                                                                                                if (pdfUploadError) {
 
-                            showNotification('Erro no upload do PDF: ' + pdfUploadError.message, 'error');
+                                                                                                                                                                    showNotification('Erro no upload do PDF: ' + pdfUploadError.message, 'error');
 
-                            return;
+                                                                                                                                                                    return;
 
-                        }
+                                                                                                                                                                }
 
-                        const { data: pdfUrlData } = _supabase.storage.from('project-pdfs').getPublicUrl(pdfFilePath);
+                                                                                                                                                                // O getPublicUrl também deve usar o caminho sem o prefixo 'public/'
 
-                        finalPdfUrl = pdfUrlData.publicUrl;
+                                                                                                                                                                const { data: pdfUrlData } = _supabase.storage.from('project-pdfs').getPublicUrl(pdfFilePath);
+
+                                                                                                                                                                finalPdfUrl = pdfUrlData.publicUrl;
 
                     }
 

@@ -186,30 +186,76 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeCarousels() {
         const carousels = document.querySelectorAll('.carousel');
         carousels.forEach(carousel => {
+            const inner = carousel.querySelector('.carousel-inner');
             const items = carousel.querySelectorAll('.carousel-item');
             const prevBtn = carousel.querySelector('.carousel-control.prev');
             const nextBtn = carousel.querySelector('.carousel-control.next');
             let currentIndex = 0;
+            let intervalId = null;
 
             function showItem(index) {
-                items.forEach((item, i) => {
-                    item.classList.toggle('active', i === index);
-                });
+                // Use transform for a sliding effect
+                inner.style.transform = `translateX(-${index * 100}%)`;
             }
 
-            if(prevBtn) {
+            function next() {
+                currentIndex = (currentIndex + 1) % items.length;
+                showItem(currentIndex);
+            }
+
+            function prev() {
+                currentIndex = (currentIndex - 1 + items.length) % items.length;
+                showItem(currentIndex);
+            }
+
+            function startCarousel() {
+                if (items.length > 1) {
+                    intervalId = setInterval(next, 4000); // Change slide every 4 seconds
+                }
+            }
+
+            function resetCarousel() {
+                clearInterval(intervalId);
+                startCarousel();
+            }
+
+            if (prevBtn) {
                 prevBtn.addEventListener('click', () => {
-                    currentIndex = (currentIndex - 1 + items.length) % items.length;
-                    showItem(currentIndex);
+                    prev();
+                    resetCarousel();
                 });
             }
 
-            if(nextBtn) {
+            if (nextBtn) {
                 nextBtn.addEventListener('click', () => {
-                    currentIndex = (currentIndex + 1) % items.length;
-                    showItem(currentIndex);
+                    next();
+                    resetCarousel();
                 });
             }
+            
+            // Clone first and last items for a seamless loop effect
+            if (items.length > 1) {
+                const firstClone = items[0].cloneNode(true);
+                const lastClone = items[items.length - 1].cloneNode(true);
+                
+                inner.appendChild(firstClone);
+                inner.insertBefore(lastClone, items[0]);
+
+                inner.style.transition = 'transform 0.5s ease-in-out';
+
+                inner.addEventListener('transitionend', () => {
+                    if (currentIndex === items.length) {
+                        inner.style.transition = 'none';
+                        currentIndex = 0;
+                        showItem(currentIndex);
+                        setTimeout(() => {
+                            inner.style.transition = 'transform 0.5s ease-in-out';
+                        });
+                    }
+                });
+            }
+
+            startCarousel();
         });
     }
 

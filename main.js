@@ -181,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createProjectCard(project, votedProjectId) {
+        console.log('Project Link:', project.link, 'Project PDF URL:', project.pdf_url); // DEBUG LOG
         const hasVotedForThis = votedProjectId === project.id;
         const hasVotedInSession = votedProjectId !== null;
 

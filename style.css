@@ -976,3 +976,14 @@ footer {
 .carousel-control.next {
     right: 10px;
 }
+
+/* --- Logo Styles --- */
+.logo img {
+    height: 50px;
+    width: auto;
+    vertical-align: middle; /* Aligns image nicely with any adjacent text */
+}
+
+footer .logo img {
+    height: 70px;
+}

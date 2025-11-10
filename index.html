@@ -9,15 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="logo02.png">
 </head>
 <body>
     <!-- Header -->
     <header>
         <nav>
-            <div class="logo">
-                <i class="fas fa-lemon"></i>
-                Limonada Summit
-            </div>
+            <a href="index.html" class="logo">
+                <img src="logo02.png" alt="Limonada Summit Logo" />
+            </a>
             <div class="header-actions">
                 <a href="admin.html" id="adminBtn" class="btn btn-outline hidden" title="Painel do Administrador">
                     <i class="fas fa-user-shield"></i> Admin
@@ -31,7 +31,7 @@
         <!-- Hero Section -->
         <section class="hero">
             <div class="hero-content">
-                <h1>Escolha o Melhor Projeto Escolar</h1>
+                <h1>Vote no projeto que mais te impactou</h1>
                 <p>Participe da competição Limonada Summit e vote no projeto mais inovador. Sua opinião faz a diferença!</p>
                 <button class="btn btn-secondary btn-lg" onclick="document.getElementById('projects').scrollIntoView({behavior: 'smooth'})">
                     <i class="fas fa-vote-yea"></i>
@@ -80,21 +80,16 @@
                 <div class="steps">
                     <div class="step">
                         <div class="step-number">1</div>
-                        <h3>Faça Login</h3>
-                        <p>Entre com sua conta Google de forma rápida e segura</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
                         <h3>Explore Projetos</h3>
                         <p>Veja todos os projetos e conheça as ideias inovadoras</p>
                     </div>
                     <div class="step">
-                        <div class="step-number">3</div>
+                        <div class="step-number">2</div>
                         <h3>Vote</h3>
-                        <p>Escolha seu projeto favorito e vote (apenas 1 voto por usuário)</p>
+                        <p>Escolha seu projeto favorito e vote (apenas 1 voto por sessão)</p>
                     </div>
                     <div class="step">
-                        <div class="step-number">4</div>
+                        <div class="step-number">3</div>
                         <h3>Acompanhe</h3>
                         <p>Acompanhe o ranking em tempo real até o final da votação</p>
                     </div>
@@ -106,9 +101,8 @@
     <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <div class="logo" style="color: white;">
-                <i class="fas fa-lemon"></i>
-                Limonada Summit 2024
+            <div class="logo">
+                <img src="logo01.png" alt="Limonada Summit Logo" />
             </div>
             <p style="margin: 1rem 0;">Incentivando a criatividade e inovação dos jovens talentos</p>
             <div class="social-links">

@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         
 
-                            const ends_at = new Date(Date.now() + totalMilliseconds).toISOString();
+                                        const ends_at = new Date(Date.now() + totalMilliseconds).toISOString();
 
         
 
@@ -500,23 +500,103 @@ document.addEventListener('DOMContentLoaded', () => {
 
         
 
-                            await _supabase.from('sessions').update({ is_active: false }).eq('is_active', true);
+                            
 
         
 
-                            const { error } = await _supabase.from('sessions').insert({ ends_at });
+                
 
         
 
-                            if (error) showNotification('Erro ao criar nova sessão: ' + error.message, 'error');
+                                        // Desativa a sessão antiga
 
         
 
-                            else showNotification('Nova sessão de votação iniciada com sucesso!', 'success');
+                
 
         
 
-                        }
+                                        await _supabase.from('sessions').update({ is_active: false }).eq('is_active', true);
+
+        
+
+                
+
+        
+
+                                        
+
+        
+
+                
+
+        
+
+                                        // Insere a nova sessão, marcando-a explicitamente como ativa
+
+        
+
+                
+
+        
+
+                                        const { error } = await _supabase.from('sessions').insert({ ends_at: ends_at, is_active: true });
+
+        
+
+                
+
+        
+
+                            
+
+        
+
+                
+
+        
+
+                                        if (error) {
+
+        
+
+                
+
+        
+
+                                            showNotification('Erro ao criar nova sessão: ' + error.message, 'error');
+
+        
+
+                
+
+        
+
+                                        } else {
+
+        
+
+                
+
+        
+
+                                            showNotification('Nova sessão de votação iniciada com sucesso!', 'success');
+
+        
+
+                
+
+        
+
+                                        }
+
+        
+
+                
+
+        
+
+                                    }
 
         
 

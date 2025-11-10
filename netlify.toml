@@ -14,6 +14,10 @@
   # Garante que estamos usando uma versão do Node.js que o Netlify suporta bem.
   NODE_VERSION = "18"
 
+# Configuração para Netlify Functions
+[functions]
+  directory = "netlify/functions" # Onde suas funções serverless estão localizadas
+
 # Redirecionamento opcional para uma experiência de SPA (Single Page App),
 # embora não seja estritamente necessário para este projeto.
 [[redirects]]

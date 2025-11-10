@@ -3,36 +3,44 @@
 // =================================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    const correctPassword = "pobresservos"; // Senha hardcoded temporariamente para evitar exposição via config.js
+    // A senha não é mais hardcoded aqui, é verificada por uma Netlify Function
     const passwordModal = document.getElementById('passwordModal');
     const passwordForm = document.getElementById('passwordForm');
     const passwordError = document.getElementById('passwordError');
     const adminWrapper = document.getElementById('admin-wrapper');
 
-    // Remove a verificação de !correctPassword, pois agora é hardcoded
-    
-    passwordForm.addEventListener('submit', (e) => {
+    passwordForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const enteredPassword = e.target.elements.adminPassword.value;
 
-        if (enteredPassword === correctPassword) {
+        // Chama a Netlify Function para verificar a senha
+        const response = await fetch('/.netlify/functions/verify-admin-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ password: enteredPassword }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
             passwordModal.style.animation = 'fadeOut 0.3s ease forwards';
             setTimeout(() => passwordModal.classList.remove('active'), 300);
             adminWrapper.style.display = 'block';
             initializeApp();
         } else {
+            passwordError.textContent = data.message || 'Senha incorreta. Tente novamente.';
             passwordError.style.display = 'block';
             e.target.elements.adminPassword.value = '';
             e.target.elements.adminPassword.focus();
         }
     });
 
-    try {
-        if (!document.styleSheets[0]?.cssRules.namedItem('fadeOut')) {
+    if (!document.styleSheets[0] || !document.styleSheets[0].cssRules.namedItem('fadeOut')) {
+        try {
             document.styleSheets[0].insertRule(`@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }`, document.styleSheets[0].cssRules.length);
-        }
-    } catch (e) {
-        console.warn("Could not add fadeOut animation rule, likely due to CORS policy.", e);
+        } catch (e) { console.warn("Could not add fadeOut animation rule, likely due to CORS policy.", e); }
     }
 
     function initializeApp() {

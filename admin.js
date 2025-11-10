@@ -24,7 +24,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const data = await response.json();
 
-        if (response.ok && data.success) {
+        if (response.ok && data.success && data.supabase_access_token && data.supabase_refresh_token) {
+            // Autentica o usuário no Supabase com os tokens retornados pela Netlify Function
+            const { error: sessionError } = await _supabase.auth.setSession({
+                access_token: data.supabase_access_token,
+                refresh_token: data.supabase_refresh_token,
+            });
+
+            if (sessionError) {
+                console.error('Erro ao estabelecer sessão Supabase:', sessionError);
+                passwordError.textContent = 'Erro ao estabelecer sessão. Tente novamente.';
+                passwordError.style.display = 'block';
+                return;
+            }
+
             passwordModal.style.animation = 'fadeOut 0.3s ease forwards';
             setTimeout(() => passwordModal.classList.remove('active'), 300);
             adminWrapper.style.display = 'block';

@@ -72,12 +72,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function getUserVote(userId, sessionUUID) {
         if (!userId || !sessionUUID) return null;
-        const { data, error } = await _supabase.from('votes').select('project_id').eq('user_id', userId).eq('session_uuid', sessionUUID).single();
-        if (error && error.code !== 'PGRST116') {
+        
+        // Usar .limit(1) em vez de .single() para evitar o erro 406 quando não encontra resultados.
+        const { data, error } = await _supabase
+            .from('votes')
+            .select('project_id')
+            .eq('user_id', userId)
+            .eq('session_uuid', sessionUUID)
+            .limit(1);
+
+        if (error) {
             console.error('Erro ao buscar voto do usuário:', error);
             return null;
         }
-        userVoteInSession = data ? data.project_id : null;
+        
+        // Se data existir e tiver um item, o usuário já votou.
+        userVoteInSession = (data && data.length > 0) ? data[0].project_id : null;
         return userVoteInSession;
     }
 

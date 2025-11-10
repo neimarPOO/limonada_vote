@@ -11,39 +11,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     passwordForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const enteredEmail = "admin@limonada.com"; // Email fixo para o admin
         const enteredPassword = e.target.elements.adminPassword.value;
 
-        // Chama a Netlify Function para verificar a senha
-        const response = await fetch('/.netlify/functions/verify-admin-password', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ password: enteredPassword }),
+        const { data, error } = await _supabase.auth.signInWithPassword({
+            email: enteredEmail,
+            password: enteredPassword,
         });
 
-        const data = await response.json();
+        if (error) {
+            passwordError.textContent = error.message || 'Senha incorreta. Tente novamente.';
+            passwordError.style.display = 'block';
+            e.target.elements.adminPassword.value = '';
+            e.target.elements.adminPassword.focus();
+            return;
+        }
 
-        if (response.ok && data.success && data.supabase_access_token && data.supabase_refresh_token) {
-            // Autentica o usuário no Supabase com os tokens retornados pela Netlify Function
-            const { error: sessionError } = await _supabase.auth.setSession({
-                access_token: data.supabase_access_token,
-                refresh_token: data.supabase_refresh_token,
-            });
-
-            if (sessionError) {
-                console.error('Erro ao estabelecer sessão Supabase:', sessionError);
-                passwordError.textContent = 'Erro ao estabelecer sessão. Tente novamente.';
-                passwordError.style.display = 'block';
-                return;
-            }
-
+        if (data.session) {
             passwordModal.style.animation = 'fadeOut 0.3s ease forwards';
             setTimeout(() => passwordModal.classList.remove('active'), 300);
             adminWrapper.style.display = 'block';
             initializeApp();
         } else {
-            passwordError.textContent = data.message || 'Senha incorreta. Tente novamente.';
+            passwordError.textContent = 'Erro desconhecido na autenticação.';
             passwordError.style.display = 'block';
             e.target.elements.adminPassword.value = '';
             e.target.elements.adminPassword.focus();

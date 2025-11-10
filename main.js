@@ -351,33 +351,6 @@ function showNotification(message, type = 'info') {
     document.body.appendChild(notification);
 
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.5s ease forwards';
-        setTimeout(() => notification.remove(), 500);
-    }, 3000);
-
-    try {
-        let ruleExists = false;
-        for (const sheet of document.styleSheets) {
-            try {
-                for (const rule of sheet.cssRules) {
-                    if (rule.name === 'slideOut') {
-                        ruleExists = true;
-                        break;
-                    }
-                }
-            } catch (e) { /* Ignore CORS errors */ }
-            if (ruleExists) break;
-        }
-
-        if (!ruleExists) {
-            for (const sheet of document.styleSheets) {
-                if (!sheet.href || sheet.href.startsWith(window.location.origin)) {
-                    sheet.insertRule(`@keyframes slideOut { from { transform: translateX(0); opacity: 0; } to { transform: translateX(110%); opacity: 0; } }`, sheet.cssRules.length);
-                    break;
-                }
-            }
-        }
-    } catch (e) {
-        console.warn("Could not add slideOut animation rule.", e);
-    }
+        notification.remove();
+    }, 4000); // Notification stays for 4 seconds
 }

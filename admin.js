@@ -60,8 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Main Functions ---
         async function loadDashboard() {
-            const { data: activeSession, error: sessionError } = await _supabase.from('sessions').select('session_uuid').eq('is_active', true).single();
-            if (sessionError && sessionError.code !== 'PGRST116') console.error('Erro ao buscar sessão ativa:', sessionError);
+            const { data: sessionData, error: sessionError } = await _supabase
+                .from('sessions')
+                .select('session_uuid')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            if (sessionError) {
+                console.error('Erro ao buscar sessão ativa:', sessionError);
+            }
+            
+            const activeSession = (sessionData && sessionData.length > 0) ? sessionData[0] : null;
             const currentSessionUUID = activeSession?.session_uuid;
 
             const { data: projects, error: prjError } = await _supabase.from('projects_with_votes').select('*');
@@ -738,88 +748,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Notification System ---
 
+        
+
         function showNotification(message, type = 'info') {
+
+        
 
             const notification = document.createElement('div');
 
+        
+
             notification.className = `notification ${type}`;
+
+        
 
             notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}`;
 
+        
+
             document.body.appendChild(notification);
+
+        
 
             
 
+        
+
             setTimeout(() => {
 
-                notification.style.animation = 'slideOut 0.5s ease forwards';
+        
 
-                setTimeout(() => notification.remove(), 500);
-
-            }, 3000);
+                notification.remove();
 
         
 
-            try {
-
-                // Check if the rule already exists to avoid re-inserting
-
-                let ruleExists = false;
-
-                for (const sheet of document.styleSheets) {
-
-                    // Wrap rule access in another try-catch for cross-origin sheets
-
-                    try {
-
-                        for (const rule of sheet.cssRules) {
-
-                            if (rule.name === 'slideOut') {
-
-                                ruleExists = true;
-
-                                break;
-
-                            }
-
-                        }
-
-                    } catch (e) {
-
-                        // Ignore CORS errors on foreign stylesheets
-
-                    }
-
-                    if (ruleExists) break;
-
-                }
+            }, 4000); // Notification stays for 4 seconds
 
         
-
-                if (!ruleExists) {
-
-                    // Find the first local stylesheet to insert the rule
-
-                    for (const sheet of document.styleSheets) {
-
-                        if (!sheet.href || sheet.href.startsWith(window.location.origin)) {
-
-                            sheet.insertRule(`@keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(110%); opacity: 0; } }`, sheet.cssRules.length);
-
-                            break;
-
-                        }
-
-                    }
-
-                }
-
-            } catch (e) {
-
-                console.warn("Could not add slideOut animation rule.", e);
-
-            }
 
         }
+
+        
+
+        
 
         

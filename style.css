@@ -182,6 +182,7 @@ nav {
 }
 
 .hero h1 {
+    font-family: 'Momo Trust Display', sans-serif;
     font-size: clamp(2.5rem, 5vw, 4rem);
     margin-bottom: 1rem;
     font-weight: 800;

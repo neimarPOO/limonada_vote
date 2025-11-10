@@ -1,0 +1,23 @@
+# Configuração para o Netlify
+
+[build]
+  # Este comando será executado no momento do build no Netlify.
+  # Ele pega as variáveis de ambiente configuradas na UI do Netlify
+  # e as usa para criar o arquivo config.js que será publicado com o site.
+  command = "echo 'const SUPABASE_URL = \"'${SUPABASE_URL}'\"; const SUPABASE_KEY = \"'${SUPABASE_KEY}'\"; const ADMIN_PASSWORD = \"'${ADMIN_PASSWORD}'\";' > config.js"
+  
+  # O diretório que o Netlify irá publicar. Como é um site estático simples,
+  # publicamos a partir da raiz do projeto.
+  publish = "."
+
+[build.environment]
+  # Garante que estamos usando uma versão do Node.js que o Netlify suporta bem.
+  NODE_VERSION = "18"
+
+# Redirecionamento opcional para uma experiência de SPA (Single Page App),
+# embora não seja estritamente necessário para este projeto.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+

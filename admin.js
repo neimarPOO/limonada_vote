@@ -306,9 +306,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         }
 
-                        const pdfFilePath = `public/${Date.now()}-${newPdfFile.name}`;
+                                        const pdfFilePath = `public/${Date.now()}-${encodeURIComponent(newPdfFile.name)}`;
 
-                        const { error: pdfUploadError } = await _supabase.storage.from('project-pdfs').upload(pdfFilePath, newPdfFile);
+                                        const { error: pdfUploadError } = await _supabase.storage.from('project-pdfs').upload(pdfFilePath, newPdfFile);
 
                         if (pdfUploadError) {
 

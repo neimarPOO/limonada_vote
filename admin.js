@@ -3,18 +3,13 @@
 // =================================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // A senha é carregada a partir do arquivo config.js
-    const correctPassword = typeof ADMIN_PASSWORD !== 'undefined' ? ADMIN_PASSWORD : "";
+    const correctPassword = "pobresservos"; // Senha hardcoded temporariamente para evitar exposição via config.js
     const passwordModal = document.getElementById('passwordModal');
     const passwordForm = document.getElementById('passwordForm');
     const passwordError = document.getElementById('passwordError');
     const adminWrapper = document.getElementById('admin-wrapper');
 
-    if (!correctPassword) {
-        const modalContent = document.querySelector('#passwordModal .modal-content');
-        modalContent.innerHTML = '<h2>Erro de Configuração</h2><p>A senha de administrador não foi encontrada. Verifique se o arquivo <code>config.js</code> existe e está configurado corretamente.</p>';
-        return;
-    }
+    // Remove a verificação de !correctPassword, pois agora é hardcoded
     
     passwordForm.addEventListener('submit', (e) => {
         e.preventDefault();

@@ -306,9 +306,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         }
 
-                                        const pdfFilePath = `public/${Date.now()}-${encodeURIComponent(newPdfFile.name)}`;
+                                                        const cleanedFileName = newPdfFile.name
 
-                                        const { error: pdfUploadError } = await _supabase.storage.from('project-pdfs').upload(pdfFilePath, newPdfFile);
+                                                                                        .replace(/\s/g, '-') // Substitui espaços por hífens
+
+                                                                                        .replace(/[^a-zA-Z0-9-._]/g, '') // Remove caracteres especiais, exceto hífens, underscores e pontos
+
+                                                                                        .toLowerCase(); // Opcional: converte para minúsculas para consistência
+
+                                                        const pdfFilePath = `public/${Date.now()}-${cleanedFileName}`;
+
+                                                        const { error: pdfUploadError } = await _supabase.storage.from('project-pdfs').upload(pdfFilePath, newPdfFile);
 
                         if (pdfUploadError) {
 

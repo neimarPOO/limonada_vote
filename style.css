@@ -325,10 +325,11 @@ nav {
 }
 
 .card-back {
-    background: var(--card-bg);
+    background: var(--primary);
     transform: rotateY(180deg);
     justify-content: center;
     padding: 1.5rem;
+    color: white;
 }
 
 .project-card:hover {
@@ -414,7 +415,7 @@ nav {
 }
 
 .back-title {
-    color: var(--primary);
+    color: white;
     margin-bottom: 0.5rem;
 }
 
@@ -437,7 +438,7 @@ nav {
 }
 
 .project-author {
-    color: var(--text-light);
+    color: white;
     font-size: 0.85rem; /* Reduce font size */
     margin-bottom: 1rem;
     display: flex;
@@ -450,12 +451,12 @@ nav {
 }
 
 .project-description {
-    color: var(--text-light);
+    color: white;
     font-size: 0.95rem;
     margin-bottom: 1.5rem;
     line-height: 1.5;
     flex-grow: 1;
-    max-height: 100px; /* Set a max-height for the description */
+    max-height: 200px; /* Set a max-height for the description */
     overflow-y: auto; /* Add a scrollbar if the content overflows */
 }
 

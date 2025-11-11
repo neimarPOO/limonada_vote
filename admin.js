@@ -40,25 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Check if the fadeOut animation rule exists, or try to add it
-    if (!document.querySelector('style[data-keyframe="fadeOut"]')) { // Check if a style tag with this data attribute exists
+    if (!document.styleSheets[0] || !document.styleSheets[0].cssRules.namedItem('fadeOut')) {
         try {
-            const style = document.createElement('style');
-            style.type = 'text/css';
-            style.setAttribute('data-keyframe', 'fadeOut'); // Add a data attribute for easier checking
-            style.innerHTML = `@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }`;
-            document.getElementsByTagName('head')[0].appendChild(style);
-        } catch (e) { console.warn("Could not add fadeOut animation rule.", e); }
-    }
-
-    // Generic debounce function
-    function debounce(func, delay) {
-        let timeout;
-        return function(...args) {
-            const context = this;
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(context, args), delay);
-        };
+            document.styleSheets[0].insertRule(`@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }`, document.styleSheets[0].cssRules.length);
+        } catch (e) { console.warn("Could not add fadeOut animation rule, likely due to CORS policy.", e); }
     }
 
     function initializeApp() {
@@ -69,69 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const resetVotingBtn = document.getElementById('resetVotingBtn');
         const adminProjectsGrid = document.getElementById('adminProjectsGrid');
         const rankingTable = document.getElementById('rankingTable');
+        const totalProjectsEl = document.getElementById('totalProjects');
+        const totalVotesEl = document.getElementById('totalVotes');
+        const activeVotersEl = document.getElementById('activeVoters');
+        const avgVotesEl = document.getElementById('avgVotes');
         const projectImageFile = document.getElementById('projectImageFile');
         const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-
-        // Chart instances
-        let totalProjectsChartInstance;
-        let totalVotesChartInstance;
-        let activeVotersChartInstance;
-        let avgVotesChartInstance;
-
-        // Initialize Charts
-        const chartOptions = {
-            responsive: true,
-            maintainAspectRatio: true, // Changed to true to maintain aspect ratio
-            plugins: {
-                legend: { display: false },
-                tooltip: { enabled: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { precision: 0 }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { display: false }
-                }
-            }
-        };
-
-        if (document.getElementById('totalProjectsChart')) {
-            totalProjectsChartInstance = new Chart(document.getElementById('totalProjectsChart'), {
-                type: 'bar',
-                data: { labels: ['Projetos'], datasets: [{ data: [0], backgroundColor: 'rgba(75, 192, 192, 0.6)' }] },
-                options: chartOptions
-            });
-        }
-        if (document.getElementById('totalVotesChart')) {
-            totalVotesChartInstance = new Chart(document.getElementById('totalVotesChart'), {
-                type: 'bar',
-                data: { labels: ['Votos'], datasets: [{ data: [0], backgroundColor: 'rgba(153, 102, 255, 0.6)' }] },
-                options: chartOptions
-            });
-        }
-        if (document.getElementById('activeVotersChart')) {
-            activeVotersChartInstance = new Chart(document.getElementById('activeVotersChart'), {
-                type: 'bar',
-                data: { labels: ['Votantes'], datasets: [{ data: [0], backgroundColor: 'rgba(255, 159, 64, 0.6)' }] },
-                options: chartOptions
-            });
-        }
-        if (document.getElementById('avgVotesChart')) {
-            avgVotesChartInstance = new Chart(document.getElementById('avgVotesChart'), {
-                type: 'bar',
-                data: { labels: ['Média'], datasets: [{ data: [0], backgroundColor: 'rgba(255, 99, 132, 0.6)' }] },
-                options: {
-                    ...chartOptions,
-                    scales: {
-                        y: { beginAtZero: true },
-                        x: { grid: { display: false }, ticks: { display: false } }
-                    }
-                }
-            });
-        }
 
         // --- Main Functions ---
         async function loadDashboard() {
@@ -157,22 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            totalProjectsChartInstance.data.datasets[0].data[0] = projects.length;
-            totalProjectsChartInstance.options.scales.y.max = Math.max(projects.length * 1.2, 5); // Ensure a minimum max of 5
-            totalProjectsChartInstance.update();
-
-            totalVotesChartInstance.data.datasets[0].data[0] = totalVotes;
-            totalVotesChartInstance.options.scales.y.max = Math.max(totalVotes * 1.2, 5); // Ensure a minimum max of 5
-            totalVotesChartInstance.update();
-
-            activeVotersChartInstance.data.datasets[0].data[0] = new Set(votes.map(v => v.user_id)).size;
-            activeVotersChartInstance.options.scales.y.max = Math.max(new Set(votes.map(v => v.user_id)).size * 1.2, 5); // Ensure a minimum max of 5
-            activeVotersChartInstance.update();
-
-            const avgVotes = projects.length > 0 ? parseFloat((totalVotes / projects.length).toFixed(1)) : 0;
-            avgVotesChartInstance.data.datasets[0].data[0] = avgVotes;
-            avgVotesChartInstance.options.scales.y.max = Math.max(avgVotes * 1.2, 5); // Ensure a minimum max of 5
-            avgVotesChartInstance.update();
+            totalProjectsEl.textContent = projects.length;
+            totalVotesEl.textContent = totalVotes;
+            activeVotersEl.textContent = new Set(votes.map(v => v.user_id)).size;
+            avgVotesEl.textContent = projects.length > 0 ? (totalVotes / projects.length).toFixed(1) : 0;
 
             loadRanking(projects, totalVotes);
         }
@@ -833,39 +749,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         
 
-                                function subscribeToChanges() {
+                                                function subscribeToChanges() {
 
         
 
-                                    const debouncedLoadDashboard = debounce(loadDashboard, 300); // Debounce by 300ms
+                                                    _supabase.channel('public-admin-changes')
 
         
 
-                
+                                                        .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => { loadDashboard(); loadAdminProjects(); })
 
         
 
-                                    _supabase.channel('public-admin-changes')
+                                                        .on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, loadDashboard)
 
         
 
-                                        .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => { debouncedLoadDashboard(); loadAdminProjects(); })
+                                                        .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, loadDashboard)
 
         
 
-                                        .on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, debouncedLoadDashboard)
+                                                        .subscribe();
 
         
 
-                                        .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, debouncedLoadDashboard)
-
-        
-
-                                        .subscribe();
-
-        
-
-                                }
+                                                }
 
         
 

@@ -334,14 +334,14 @@ nav {
 }
 
 .project-content {
-    padding: 1.5rem;
+    padding: 1rem; /* Reduce padding for a tighter look */
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
 .project-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem; /* Slightly reduce font size */
     font-weight: 700;
     margin-bottom: 0.5rem;
     color: var(--text);
@@ -349,11 +349,15 @@ nav {
 
 .project-author {
     color: var(--text-light);
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Reduce font size */
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem; /* Adjust gap */
+}
+
+.project-author i {
+    font-size: 0.9rem; /* Adjust icon size */
 }
 
 .project-description {
@@ -380,19 +384,24 @@ nav {
     color: var(--primary);
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.35rem; /* Adjust gap */
+    font-size: 0.9rem; /* Adjust font size */
+}
+
+.vote-count i {
+    font-size: 1rem; /* Adjust icon size */
 }
 
 .vote-btn {
     background: transparent;
     border: 2px solid var(--primary);
     color: var(--primary);
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem; /* Adjust padding */
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Adjust font size */
 }
 
 .vote-btn:hover:not(:disabled) {
@@ -1131,6 +1140,8 @@ footer {
 .card-actions .btn {
     flex: 1;
     justify-content: center;
+    padding: 0.5rem 0.8rem; /* Adjust padding */
+    font-size: 0.85rem; /* Adjust font size */
 }
 
 /* --- Carousel Styles --- */
@@ -1141,6 +1152,7 @@ footer {
     height: 200px; /* Same height as the old project-image */
     overflow: hidden;
     border-radius: 12px 12px 0 0; /* Match card radius */
+    background-color: #f0f0f0; /* Add a light background color */
 }
 
 .carousel-inner {
@@ -1154,7 +1166,7 @@ footer {
     min-width: 100%;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain; /* Change from cover to contain */
 }
 
 .carousel-control {

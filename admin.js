@@ -158,20 +158,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             totalProjectsChartInstance.data.datasets[0].data[0] = projects.length;
-            totalProjectsChartInstance.options.scales.y.max = projects.length > 0 ? projects.length * 1.2 : 1;
+            totalProjectsChartInstance.options.scales.y.max = Math.max(projects.length * 1.2, 5); // Ensure a minimum max of 5
             totalProjectsChartInstance.update();
 
             totalVotesChartInstance.data.datasets[0].data[0] = totalVotes;
-            totalVotesChartInstance.options.scales.y.max = totalVotes > 0 ? totalVotes * 1.2 : 1;
+            totalVotesChartInstance.options.scales.y.max = Math.max(totalVotes * 1.2, 5); // Ensure a minimum max of 5
             totalVotesChartInstance.update();
 
             activeVotersChartInstance.data.datasets[0].data[0] = new Set(votes.map(v => v.user_id)).size;
-            activeVotersChartInstance.options.scales.y.max = new Set(votes.map(v => v.user_id)).size > 0 ? new Set(votes.map(v => v.user_id)).size * 1.2 : 1;
+            activeVotersChartInstance.options.scales.y.max = Math.max(new Set(votes.map(v => v.user_id)).size * 1.2, 5); // Ensure a minimum max of 5
             activeVotersChartInstance.update();
 
             const avgVotes = projects.length > 0 ? parseFloat((totalVotes / projects.length).toFixed(1)) : 0;
             avgVotesChartInstance.data.datasets[0].data[0] = avgVotes;
-            avgVotesChartInstance.options.scales.y.max = avgVotes > 0 ? avgVotes * 1.2 : 1;
+            avgVotesChartInstance.options.scales.y.max = Math.max(avgVotes * 1.2, 5); // Ensure a minimum max of 5
             avgVotesChartInstance.update();
 
             loadRanking(projects, totalVotes);

@@ -46,6 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { console.warn("Could not add fadeOut animation rule, likely due to CORS policy.", e); }
     }
 
+    // Generic debounce function
+    function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
     function initializeApp() {
         // --- DOM Elements ---
         const projectForm = document.getElementById('projectForm');
@@ -801,21 +811,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
         
 
-                // --- Real-time Subscriptions & Initial Load ---
+                                // --- Real-time Subscriptions & Initial Load ---
 
-                function subscribeToChanges() {
+        
 
-                    _supabase.channel('public-admin-changes')
+                                function subscribeToChanges() {
 
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => { loadDashboard(); loadAdminProjects(); })
+        
 
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, loadDashboard)
+                                    const debouncedLoadDashboard = debounce(loadDashboard, 300); // Debounce by 300ms
 
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, loadDashboard)
+        
 
-                        .subscribe();
+                
 
-                }
+        
+
+                                    _supabase.channel('public-admin-changes')
+
+        
+
+                                        .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => { debouncedLoadDashboard(); loadAdminProjects(); })
+
+        
+
+                                        .on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, debouncedLoadDashboard)
+
+        
+
+                                        .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, debouncedLoadDashboard)
+
+        
+
+                                        .subscribe();
+
+        
+
+                                }
 
         
 

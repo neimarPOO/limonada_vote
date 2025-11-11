@@ -1,3 +1,4 @@
+// Test comment
 // =================================================================================
 // Main (Public) Page Logic (Anonymous Sessions with Carousel)
 // =================================================================================
@@ -20,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageModal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
     const closeImageModal = document.getElementById('closeImageModal');
+    const carouselModal = document.getElementById('carouselModal');
+    const modalCarouselContent = document.getElementById('modalCarouselContent');
+    const closeCarouselModal = document.getElementById('closeCarouselModal');
 
     if (closeImageModal) {
         closeImageModal.onclick = function() {
@@ -33,6 +37,24 @@ document.addEventListener('DOMContentLoaded', () => {
         imageModal.onclick = function(event) {
             if (event.target === imageModal) {
                 imageModal.style.display = "none";
+            }
+        }
+    }
+
+    if (closeCarouselModal) {
+        closeCarouselModal.onclick = function() {
+            if (carouselModal) {
+                carouselModal.style.display = "none";
+                modalCarouselContent.innerHTML = ""; // Clear content
+            }
+        }
+    }
+
+    if (carouselModal) {
+        carouselModal.onclick = function(event) {
+            if (event.target === carouselModal) {
+                carouselModal.style.display = "none";
+                modalCarouselContent.innerHTML = ""; // Clear content
             }
         }
     }
@@ -214,50 +236,74 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasVotedForThis = votedProjectId === project.id;
         const hasVotedInSession = votedProjectId !== null;
 
-        let btnHtml;
+        // --- Vote Button ---
+        let voteButtonHtml;
         if (hasVotedForThis) {
-            btnHtml = `<button class="vote-btn voted" disabled><i class="fas fa-check"></i> Votado</button>`;
+            voteButtonHtml = `<button class="vote-btn voted" disabled><i class="fas fa-check"></i> Votado</button>`;
         } else if (hasVotedInSession) {
-            btnHtml = `<button class="vote-btn" disabled>Você já votou</button>`;
+            voteButtonHtml = `<button class="vote-btn" disabled>Você já votou</button>`;
         } else {
-            btnHtml = `<button class="vote-btn" onclick="window.handleVote(${project.id})">Votar</button>`;
+            voteButtonHtml = `<button class="vote-btn" onclick="window.handleVote(${project.id})"><i class="fas fa-vote-yea"></i> Votar</button>`;
         }
 
-        // --- Carousel HTML Generation ---
-        let imageHtml;
+        // --- Carousel ---
+        let carouselHtml = `<div class="project-image-placeholder">Sem Imagem</div>`;
         if (project.image && Array.isArray(project.image) && project.image.length > 0) {
-            const images = project.image.map((imgUrl, index) => 
-                `<img src="${imgUrl}" alt="${project.name} - Imagem ${index + 1}" class="carousel-item ${index === 0 ? 'active' : ''}" onclick="openImageModal('${imgUrl}')">`
+            const images = project.image.map((imgUrl, index) =>
+                `<div class="carousel-item ${index === 0 ? 'active' : ''}" style="background-image: url('${imgUrl}')"></div>`
             ).join('');
-            
-            imageHtml = `
-                <div class="carousel">
+
+            carouselHtml = `
+                <div class="carousel" data-project-id="${project.id}" onclick="this.closest('.project-card').classList.toggle('carousel-expanded')">
                     <div class="carousel-inner">${images}</div>
                     ${project.image.length > 1 ? `
-                        <button class="carousel-control prev" aria-label="Previous Image">&lt;</button>
-                        <button class="carousel-control next" aria-label="Next Image">&gt;</button>
+                        <button class="carousel-control prev" aria-label="Previous Image" onclick="event.stopPropagation(); window.carouselNavigate(this, -1);">&lt;</button>
+                        <button class="carousel-control next" aria-label="Next Image" onclick="event.stopPropagation(); window.carouselNavigate(this, 1);">&gt;</button>
                     ` : ''}
                 </div>
             `;
-        } else {
-            imageHtml = `<img src="https://placehold.co/600x400?text=Sem+Imagem" alt="${project.name}" class="project-image">`;
         }
+        
+        // --- Card Front ---
+        const cardFront = `
+            <div class="card-front">
+                ${carouselHtml}
+                <div class="project-content-front">
+                    <h3 class="project-title">${project.name}</h3>
+                    <div class="front-actions">
+                        ${voteButtonHtml}
+                        ${project.link ? `<a href="${project.link}" target="_blank" class="btn btn-outline"><i class="fas fa-external-link-alt"></i> Ver Projeto</a>` : ''}
+                    </div>
+                    <div class="project-footer">
+                        <span class="vote-count"><i class="fas fa-heart"></i> ${project.votes}</span>
+                        <button class="btn-saiba-mais" onclick="this.closest('.project-card-inner').classList.add('is-flipped')">
+                            Saiba Mais <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // --- Card Back ---
+        const cardBack = `
+            <div class="card-back">
+                <div class="project-content-back">
+                    <h4 class="back-title">Sobre o Projeto</h4>
+                    <p class="project-description">${project.description}</p>
+                    <p class="project-author"><i class="fas fa-user-graduate"></i> ${project.author} • ${project.category}</p>
+                    ${project.pdf_url ? `<a href="${project.pdf_url}" target="_blank" class="btn btn-secondary"><i class="fas fa-file-pdf"></i> Baixar PDF</a>` : ''}
+                    <button class="btn-voltar" onclick="this.closest('.project-card-inner').classList.remove('is-flipped')">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </button>
+                </div>
+            </div>
+        `;
 
         return `
             <div class="project-card" style="animation-delay: ${Math.random() * 0.3}s">
-                ${imageHtml}
-                <div class="project-content">
-                    <h3 class="project-title">${project.name}</h3>
-                    <p class="project-author"><i class="fas fa-user-graduate"></i> ${project.author} • ${project.category}</p>
-                    <p class="project-description">${project.description}</p>
-                    <div class="project-footer">
-                        <span class="vote-count"><i class="fas fa-heart"></i> ${project.votes} votos</span>
-                        ${btnHtml}
-                    </div>
-                    <div class="card-actions">
-                        ${project.link ? `<a href="${project.link}" target="_blank" class="btn btn-outline"><i class="fas fa-external-link-alt"></i> Ver Projeto</a>` : ''}
-                        ${project.pdf_url ? `<a href="${project.pdf_url}" target="_blank" class="btn btn-secondary"><i class="fas fa-file-pdf"></i> Baixar PDF</a>` : ''}
-                    </div>
+                <div class="project-card-inner">
+                    ${cardFront}
+                    ${cardBack}
                 </div>
             </div>
         `;

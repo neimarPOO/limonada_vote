@@ -2,11 +2,41 @@
 // Main (Public) Page Logic (Anonymous Sessions with Carousel)
 // =================================================================================
 
+// --- Image Modal Logic ---
+window.openImageModal = (src) => {
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    if (imageModal && modalImage) {
+        imageModal.style.display = "flex";
+        modalImage.src = src;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const countdownEl = document.getElementById('countdown');
     const projectsGrid = document.getElementById('projectsGrid');
     const adminBtn = document.getElementById('adminBtn');
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const closeImageModal = document.getElementById('closeImageModal');
+
+    if (closeImageModal) {
+        closeImageModal.onclick = function() {
+            if (imageModal) {
+                imageModal.style.display = "none";
+            }
+        }
+    }
+
+    if (imageModal) {
+        imageModal.onclick = function(event) {
+            if (event.target === imageModal) {
+                imageModal.style.display = "none";
+            }
+        }
+    }
+
 
     // --- App State ---
     let anonymousId = null;
@@ -197,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let imageHtml;
         if (project.image && Array.isArray(project.image) && project.image.length > 0) {
             const images = project.image.map((imgUrl, index) => 
-                `<img src="${imgUrl}" alt="${project.name} - Imagem ${index + 1}" class="carousel-item ${index === 0 ? 'active' : ''}">`
+                `<img src="${imgUrl}" alt="${project.name} - Imagem ${index + 1}" class="carousel-item ${index === 0 ? 'active' : ''}" onclick="openImageModal('${imgUrl}')">`
             ).join('');
             
             imageHtml = `

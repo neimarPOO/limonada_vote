@@ -300,6 +300,7 @@ nav {
     border: 2px solid transparent;
     display: flex;
     flex-direction: column;
+    height: 450px; /* Set a fixed height for the cards */
 }
 
 .project-card:hover {
@@ -361,6 +362,8 @@ nav {
     margin-bottom: 1.5rem;
     line-height: 1.5;
     flex-grow: 1;
+    max-height: 100px; /* Set a max-height for the description */
+    overflow-y: auto; /* Add a scrollbar if the content overflows */
 }
 
 .project-footer {
@@ -1197,4 +1200,31 @@ footer {
 
 footer .logo img {
     height: 100px; /* Adjusted for consistency */
+}
+
+/* Image Modal */
+#imageModal .modal-content {
+    max-width: 90%;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    margin: auto;
+    display: block;
+}
+
+#imageModal .close-modal {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+#imageModal .close-modal:hover,
+#imageModal .close-modal:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
 }

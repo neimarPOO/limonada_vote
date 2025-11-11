@@ -42,8 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!document.styleSheets[0] || !document.styleSheets[0].cssRules.namedItem('fadeOut')) {
         try {
-            document.styleSheets[0].insertRule(`@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }`, document.styleSheets[0].cssRules.length);
-        } catch (e) { console.warn("Could not add fadeOut animation rule, likely due to CORS policy.", e); }
+            const style = document.createElement('style');
+            style.type = 'text/css';
+            style.innerHTML = `@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }`;
+            document.getElementsByTagName('head')[0].appendChild(style);
+        } catch (e) { console.warn("Could not add fadeOut animation rule.", e); }
     }
 
     // Generic debounce function
@@ -93,32 +96,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        totalProjectsChartInstance = new Chart(document.getElementById('totalProjectsChart'), {
-            type: 'bar',
-            data: { labels: ['Projetos'], datasets: [{ data: [0], backgroundColor: 'rgba(75, 192, 192, 0.6)' }] },
-            options: chartOptions
-        });
-        totalVotesChartInstance = new Chart(document.getElementById('totalVotesChart'), {
-            type: 'bar',
-            data: { labels: ['Votos'], datasets: [{ data: [0], backgroundColor: 'rgba(153, 102, 255, 0.6)' }] },
-            options: chartOptions
-        });
-        activeVotersChartInstance = new Chart(document.getElementById('activeVotersChart'), {
-            type: 'bar',
-            data: { labels: ['Votantes'], datasets: [{ data: [0], backgroundColor: 'rgba(255, 159, 64, 0.6)' }] },
-            options: chartOptions
-        });
-        avgVotesChartInstance = new Chart(document.getElementById('avgVotesChart'), {
-            type: 'bar',
-            data: { labels: ['Média'], datasets: [{ data: [0], backgroundColor: 'rgba(255, 99, 132, 0.6)' }] },
-            options: {
-                ...chartOptions,
-                scales: {
-                    y: { beginAtZero: true },
-                    x: { grid: { display: false }, ticks: { display: false } }
+        if (document.getElementById('totalProjectsChart')) {
+            totalProjectsChartInstance = new Chart(document.getElementById('totalProjectsChart'), {
+                type: 'bar',
+                data: { labels: ['Projetos'], datasets: [{ data: [0], backgroundColor: 'rgba(75, 192, 192, 0.6)' }] },
+                options: chartOptions
+            });
+        }
+        if (document.getElementById('totalVotesChart')) {
+            totalVotesChartInstance = new Chart(document.getElementById('totalVotesChart'), {
+                type: 'bar',
+                data: { labels: ['Votos'], datasets: [{ data: [0], backgroundColor: 'rgba(153, 102, 255, 0.6)' }] },
+                options: chartOptions
+            });
+        }
+        if (document.getElementById('activeVotersChart')) {
+            activeVotersChartInstance = new Chart(document.getElementById('activeVotersChart'), {
+                type: 'bar',
+                data: { labels: ['Votantes'], datasets: [{ data: [0], backgroundColor: 'rgba(255, 159, 64, 0.6)' }] },
+                options: chartOptions
+            });
+        }
+        if (document.getElementById('avgVotesChart')) {
+            avgVotesChartInstance = new Chart(document.getElementById('avgVotesChart'), {
+                type: 'bar',
+                data: { labels: ['Média'], datasets: [{ data: [0], backgroundColor: 'rgba(255, 99, 132, 0.6)' }] },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: { grid: { display: false }, ticks: { display: false } }
+                    }
                 }
-            }
-        });
+            });
+        }
 
         // --- Main Functions ---
         async function loadDashboard() {

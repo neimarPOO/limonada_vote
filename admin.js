@@ -40,10 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    if (!document.styleSheets[0] || !document.styleSheets[0].cssRules.namedItem('fadeOut')) {
+    // Check if the fadeOut animation rule exists, or try to add it
+    if (!document.querySelector('style[data-keyframe="fadeOut"]')) { // Check if a style tag with this data attribute exists
         try {
             const style = document.createElement('style');
             style.type = 'text/css';
+            style.setAttribute('data-keyframe', 'fadeOut'); // Add a data attribute for easier checking
             style.innerHTML = `@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }`;
             document.getElementsByTagName('head')[0].appendChild(style);
         } catch (e) { console.warn("Could not add fadeOut animation rule.", e); }
@@ -79,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize Charts
         const chartOptions = {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true, // Changed to true to maintain aspect ratio
             plugins: {
                 legend: { display: false },
                 tooltip: { enabled: false }
@@ -156,15 +158,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             totalProjectsChartInstance.data.datasets[0].data[0] = projects.length;
+            totalProjectsChartInstance.options.scales.y.max = projects.length > 0 ? projects.length * 1.2 : 1;
             totalProjectsChartInstance.update();
 
             totalVotesChartInstance.data.datasets[0].data[0] = totalVotes;
+            totalVotesChartInstance.options.scales.y.max = totalVotes > 0 ? totalVotes * 1.2 : 1;
             totalVotesChartInstance.update();
 
             activeVotersChartInstance.data.datasets[0].data[0] = new Set(votes.map(v => v.user_id)).size;
+            activeVotersChartInstance.options.scales.y.max = new Set(votes.map(v => v.user_id)).size > 0 ? new Set(votes.map(v => v.user_id)).size * 1.2 : 1;
             activeVotersChartInstance.update();
 
-            avgVotesChartInstance.data.datasets[0].data[0] = projects.length > 0 ? parseFloat((totalVotes / projects.length).toFixed(1)) : 0;
+            const avgVotes = projects.length > 0 ? parseFloat((totalVotes / projects.length).toFixed(1)) : 0;
+            avgVotesChartInstance.data.datasets[0].data[0] = avgVotes;
+            avgVotesChartInstance.options.scales.y.max = avgVotes > 0 ? avgVotes * 1.2 : 1;
             avgVotesChartInstance.update();
 
             loadRanking(projects, totalVotes);

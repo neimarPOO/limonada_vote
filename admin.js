@@ -54,12 +54,61 @@ document.addEventListener('DOMContentLoaded', () => {
         const resetVotingBtn = document.getElementById('resetVotingBtn');
         const adminProjectsGrid = document.getElementById('adminProjectsGrid');
         const rankingTable = document.getElementById('rankingTable');
-        const totalProjectsEl = document.getElementById('totalProjects');
-        const totalVotesEl = document.getElementById('totalVotes');
-        const activeVotersEl = document.getElementById('activeVoters');
-        const avgVotesEl = document.getElementById('avgVotes');
         const projectImageFile = document.getElementById('projectImageFile');
         const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+        // Chart instances
+        let totalProjectsChartInstance;
+        let totalVotesChartInstance;
+        let activeVotersChartInstance;
+        let avgVotesChartInstance;
+
+        // Initialize Charts
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { display: false }
+                }
+            }
+        };
+
+        totalProjectsChartInstance = new Chart(document.getElementById('totalProjectsChart'), {
+            type: 'bar',
+            data: { labels: ['Projetos'], datasets: [{ data: [0], backgroundColor: 'rgba(75, 192, 192, 0.6)' }] },
+            options: chartOptions
+        });
+        totalVotesChartInstance = new Chart(document.getElementById('totalVotesChart'), {
+            type: 'bar',
+            data: { labels: ['Votos'], datasets: [{ data: [0], backgroundColor: 'rgba(153, 102, 255, 0.6)' }] },
+            options: chartOptions
+        });
+        activeVotersChartInstance = new Chart(document.getElementById('activeVotersChart'), {
+            type: 'bar',
+            data: { labels: ['Votantes'], datasets: [{ data: [0], backgroundColor: 'rgba(255, 159, 64, 0.6)' }] },
+            options: chartOptions
+        });
+        avgVotesChartInstance = new Chart(document.getElementById('avgVotesChart'), {
+            type: 'bar',
+            data: { labels: ['Média'], datasets: [{ data: [0], backgroundColor: 'rgba(255, 99, 132, 0.6)' }] },
+            options: {
+                ...chartOptions,
+                scales: {
+                    y: { beginAtZero: true },
+                    x: { grid: { display: false }, ticks: { display: false } }
+                }
+            }
+        });
 
         // --- Main Functions ---
         async function loadDashboard() {
@@ -85,10 +134,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            totalProjectsEl.textContent = projects.length;
-            totalVotesEl.textContent = totalVotes;
-            activeVotersEl.textContent = new Set(votes.map(v => v.user_id)).size;
-            avgVotesEl.textContent = projects.length > 0 ? (totalVotes / projects.length).toFixed(1) : 0;
+            totalProjectsChartInstance.data.datasets[0].data[0] = projects.length;
+            totalProjectsChartInstance.update();
+
+            totalVotesChartInstance.data.datasets[0].data[0] = totalVotes;
+            totalVotesChartInstance.update();
+
+            activeVotersChartInstance.data.datasets[0].data[0] = new Set(votes.map(v => v.user_id)).size;
+            activeVotersChartInstance.update();
+
+            avgVotesChartInstance.data.datasets[0].data[0] = projects.length > 0 ? parseFloat((totalVotes / projects.length).toFixed(1)) : 0;
+            avgVotesChartInstance.update();
 
             loadRanking(projects, totalVotes);
         }

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/png" href="logo02.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div id="admin-wrapper" style="display: none;">
@@ -37,25 +38,7 @@
                 </div>
 
                 <div id="dashboard" class="tab-content active">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h4><i class="fas fa-tasks"></i> Total de Projetos</h4>
-                            <p id="totalProjects">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <h4><i class="fas fa-vote-yea"></i> Total de Votos</h4>
-                            <p id="totalVotes">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <h4><i class="fas fa-users"></i> Votantes Ativos</h4>
-                            <p id="activeVoters">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <h4><i class="fas fa-chart-pie"></i> Média de Votos/Projeto</h4>
-                            <p id="avgVotes">0.0</p>
-                        </div>
-                    </div>
-                    <div class="card" style="margin-top: 2rem;">
+                    <div class="card" style="margin-bottom: 2rem;">
                         <h3><i class="fas fa-trophy"></i> Ranking em Tempo Real</h3>
                         <table class="ranking-table">
                             <thead>
@@ -72,6 +55,24 @@
                                 <!-- Linhas do ranking serão inseridas aqui pelo JS -->
                             </tbody>
                         </table>
+                    </div>
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h4><i class="fas fa-tasks"></i> Total de Projetos</h4>
+                            <canvas id="totalProjectsChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h4><i class="fas fa-vote-yea"></i> Total de Votos</h4>
+                            <canvas id="totalVotesChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h4><i class="fas fa-users"></i> Votantes Ativos</h4>
+                            <canvas id="activeVotersChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h4><i class="fas fa-chart-pie"></i> Média de Votos/Projeto</h4>
+                            <canvas id="avgVotesChart"></canvas>
+                        </div>
                     </div>
                 </div>
 

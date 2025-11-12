@@ -59,24 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    window.carouselNavigate = (button, direction) => {
-        const carousel = button.closest('.carousel');
+    window.carouselNavigate = (carouselElement, direction) => {
+        const carousel = carouselElement.closest('.carousel');
         const carouselInner = carousel.querySelector('.carousel-inner');
         const items = carouselInner.querySelectorAll('.carousel-item');
         const itemWidth = items[0].clientWidth; // Assuming all items have the same width
 
-        let currentIndex = 0;
-        // Find the current active item
-        for (let i = 0; i < items.length; i++) {
-            const itemRect = items[i].getBoundingClientRect();
-            const carouselRect = carouselInner.getBoundingClientRect();
-            // Check if the item is mostly visible within the carouselInner
-            if (itemRect.left >= carouselRect.left && itemRect.right <= carouselRect.right + 5) { // +5 for tolerance
-                currentIndex = i;
-                break;
-            }
-        }
-
+        let currentIndex = parseInt(carouselInner.dataset.currentIndex || 0);
         let newIndex = currentIndex + direction;
 
         if (newIndex < 0) {
@@ -86,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         carouselInner.style.transform = `translateX(-${newIndex * itemWidth}px)`;
+        carouselInner.dataset.currentIndex = newIndex; // Update the current index
     };
 
 
@@ -223,6 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             showNotification('Voto registrado com sucesso!', 'success');
+            userVoteInSession = projectId; // Update userVoteInSession immediately
+            loadProjects(); 
         }
     };
 
@@ -307,8 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="carousel" data-project-id="${project.id}" onclick="this.closest('.project-card').classList.toggle('carousel-expanded')">
                     <div class="carousel-inner">${images}</div>
                     ${project.image.length > 1 ? `
-                        <button class="carousel-control prev" aria-label="Previous Image" onclick="event.stopPropagation(); window.carouselNavigate(this, -1);">&lt;</button>
-                        <button class="carousel-control next" aria-label="Next Image" onclick="event.stopPropagation(); window.carouselNavigate(this, 1);">&gt;</button>
+                        <button class="carousel-control prev" aria-label="Previous Image" onclick="event.stopPropagation(); window.carouselNavigate(this.closest('.carousel'), -1);">&lt;</button>
+                        <button class="carousel-control next" aria-label="Next Image" onclick="event.stopPropagation(); window.carouselNavigate(this.closest('.carousel'), 1);">&gt;</button>
                     ` : ''}
                 </div>
             `;
@@ -380,7 +372,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Carousel Logic ---
     function initializeCarousels() {
-        // ... (existing carousel logic remains the same)
+        document.querySelectorAll('.carousel').forEach(carousel => {
+            const carouselInner = carousel.querySelector('.carousel-inner');
+            const items = carouselInner.querySelectorAll('.carousel-item');
+
+            if (items.length > 1) {
+                // Initialize current index
+                carouselInner.dataset.currentIndex = 0;
+
+                // Set up automatic navigation
+                setInterval(() => {
+                    window.carouselNavigate(carousel, 1); // Move to the next slide
+                }, 5000); // Change image every 5 seconds
+            }
+        });
     }
 
     // --- Rating Stars Logic ---

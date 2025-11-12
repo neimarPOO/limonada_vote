@@ -190,6 +190,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 projectForm.elements.existingImageUrls.value = JSON.stringify(project.image);
                 updateImagePreview(project.image);
             }
+
+            if (project.pdf_url) {
+                projectForm.elements.existingPdfUrl.value = project.pdf_url;
+                updatePdfPreview(project.pdf_url);
+            }
             
             cancelEditBtn.style.display = 'inline-block';
             switchTab('add');

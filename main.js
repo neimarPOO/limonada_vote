@@ -214,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             showNotification('Voto registrado com sucesso!', 'success');
             userVoteInSession = projectId; // Update userVoteInSession immediately
+            console.log('handleVote: Voto registrado, userVoteInSession atualizado para:', userVoteInSession);
             loadProjects(); 
         }
     };
@@ -248,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Project Loading & UI ---
     async function loadProjects() {
+        console.log('loadProjects: Carregando projetos...');
         // Use the new view to get all stats at once
         const { data: projects, error } = await _supabase
             .from('projects_full_stats')
@@ -277,6 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasVotedForThis = votedProjectId === project.id;
         const hasVotedInSession = votedProjectId !== null;
         const userRatingForThis = userRatingsMap.get(project.id) || 0;
+
+        console.log(`createProjectCard para projeto ${project.id}: hasVotedForThis=${hasVotedForThis}, hasVotedInSession=${hasVotedInSession}, votedProjectId=${votedProjectId}`);
 
         // --- Vote Button ---
         let voteButtonHtml;

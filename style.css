@@ -245,21 +245,39 @@ nav {
 /* Section Headers */
 .section-header {
     text-align: center;
-    margin-bottom: 4rem;
+    max-width: 800px;
+    margin: 0 auto 4rem auto;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    border-top: 4px solid var(--primary);
+    position: relative;
 }
 
 .section-header h2 {
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: clamp(2rem, 4vw, 2.5rem);
     font-weight: 700;
     margin-bottom: 1rem;
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    display: inline-block;
+}
+
+.section-header h2::before {
+    content: '🏆';
+    margin-right: 0.75rem;
+    font-size: 2rem;
+    vertical-align: middle;
+    /* The gradient background won't apply to pseudo-elements, so we give it a solid color */
+    background: none;
+    -webkit-text-fill-color: var(--secondary);
 }
 
 .section-header p {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: var(--text-light);
     max-width: 600px;
     margin: 0 auto;
@@ -314,21 +332,29 @@ nav {
     background: transparent;
     border: none;
     box-shadow: none;
-    height: 550px; /* Increased height */
+    height: 550px;
 }
 
 .project-card-inner {
     position: relative;
     width: 100%;
     height: 100%;
-    transition: transform 0.8s;
     transform-style: preserve-3d;
-    box-shadow: var(--shadow);
-    border-radius: 12px;
+    border-radius: 16px;
+    background: var(--card-bg);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    border: 1px solid transparent;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.project-card-inner:hover {
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+    border-color: var(--primary);
+    transform: translateY(-8px);
 }
 
 .project-card-inner.is-flipped {
-    transform: rotateY(180deg);
+    transform: rotateY(180deg) translateY(-8px); /* Keep the lift while flipped */
 }
 
 .card-front,
@@ -336,16 +362,16 @@ nav {
     position: absolute;
     width: 100%;
     height: 100%;
-    -webkit-backface-visibility: hidden; /* Safari */
+    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    border-radius: 12px;
+    border-radius: 16px; /* Match parent */
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
 .card-back {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
     transform: rotateY(180deg);
     justify-content: center;
     padding: 1.5rem;
@@ -353,14 +379,10 @@ nav {
 }
 
 .project-card:hover {
-    transform: none; /* Remove the hover effect from the card itself */
+    transform: none;
     box-shadow: none;
     border-color: transparent;
     background: transparent;
-}
-
-.project-card-inner:hover {
-    box-shadow: var(--shadow-lg);
 }
 
 @keyframes fadeIn {
@@ -424,6 +446,22 @@ nav {
     align-self: flex-end;
     margin-top: auto;
     padding: 0.5rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.btn-saiba-mais:hover {
+    color: var(--primary-dark);
+}
+
+.btn-saiba-mais i {
+    transition: transform 0.3s ease;
+}
+
+.btn-saiba-mais:hover i {
+    transform: translateX(4px);
 }
 
 /* Back Card Content */

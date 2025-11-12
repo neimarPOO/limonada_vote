@@ -277,8 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // We just need to pass the user's vote and ratings to the card renderer.
         projectsGrid.innerHTML = projects.map(project => createProjectCard(project, userVoteInSession, userRatingsMap)).join('');
         
-        initializeCarousels();
-        initializeRatingStars(); // New function to add event listeners to stars
+        // Introduce a small delay to ensure DOM is fully updated before initializing event listeners
+        setTimeout(() => {
+            initializeCarousels();
+            initializeRatingStars(); // New function to add event listeners to stars
+        }, 50); // 50ms delay
     }
 
     function createProjectCard(project, votedProjectId, userRatingsMap) {

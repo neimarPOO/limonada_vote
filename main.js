@@ -159,7 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function getUserVote(userId, sessionUUID) {
-        if (!userId || !sessionUUID) return null;
+        if (!userId || !sessionUUID) {
+            console.log('getUserVote: userId ou sessionUUID ausentes.');
+            return null;
+        }
         
         const { data, error } = await _supabase
             .from('votes')
@@ -169,11 +172,18 @@ document.addEventListener('DOMContentLoaded', () => {
             .limit(1);
 
         if (error) {
-            console.error('Erro ao buscar voto do usuário:', error);
+            console.error('getUserVote: Erro ao buscar voto do usuário:', error);
             return null;
         }
         
-        userVoteInSession = (data && data.length > 0) ? data[0].project_id : null;
+        console.log('getUserVote: Dados do voto do usuário recebidos:', data);
+        if (data && data.length > 0) {
+            userVoteInSession = data[0].project_id;
+            console.log('getUserVote: userVoteInSession atualizado para:', userVoteInSession);
+        } else {
+            userVoteInSession = null;
+            console.log('getUserVote: Nenhum voto encontrado para o usuário nesta sessão.');
+        }
         return userVoteInSession;
     }
 

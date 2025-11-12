@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Main Functions ---
         async function loadDashboard() {
+            // 1. Buscar a sessão ativa
             const { data: sessionData, error: sessionError } = await _supabase
                 .from('sessions')
                 .select('session_uuid')
@@ -72,25 +73,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (sessionError) {
                 console.error('Erro ao buscar sessão ativa:', sessionError);
+                return;
             }
             
             const activeSession = (sessionData && sessionData.length > 0) ? sessionData[0] : null;
             const currentSessionUUID = activeSession?.session_uuid;
 
-            const { data: projects, error: prjError } = await _supabase.from('projects_with_votes').select('*');
-            const { data: votes, error: vtError, count: totalVotes } = await _supabase.from('votes').select('id, user_id', { count: 'exact' }).eq('session_uuid', currentSessionUUID);
-
-            if (prjError || vtError) {
-                console.error('Erro ao carregar dashboard:', prjError || vtError);
+            // 2. Buscar todos os projetos
+            const { data: projects, error: prjError } = await _supabase.from('projects').select('*');
+            if (prjError) {
+                console.error('Erro ao carregar projetos:', prjError);
                 return;
             }
 
+            // 3. Buscar os votos da sessão ativa
+            let votesMap = new Map();
+            let totalVotes = 0;
+            let activeVoters = new Set();
+
+            if (currentSessionUUID) {
+                const { data: votes, error: vtError } = await _supabase
+                    .from('votes')
+                    .select('project_id, user_id')
+                    .eq('session_uuid', currentSessionUUID);
+
+                if (vtError) {
+                    console.error('Erro ao carregar votos da sessão:', vtError);
+                } else {
+                    votes.forEach(vote => {
+                        votesMap.set(vote.project_id, (votesMap.get(vote.project_id) || 0) + 1);
+                        activeVoters.add(vote.user_id);
+                    });
+                    totalVotes = votes.length;
+                }
+            }
+
+            // 4. Combinar projetos com os votos da sessão
+            const projectsWithSessionVotes = projects.map(project => ({
+                ...project,
+                votes: votesMap.get(project.id) || 0
+            }));
+
+            // 5. Atualizar as estatísticas do dashboard
             totalProjectsEl.textContent = projects.length;
             totalVotesEl.textContent = totalVotes;
-            activeVotersEl.textContent = new Set(votes.map(v => v.user_id)).size;
-            avgVotesEl.textContent = projects.length > 0 ? (totalVotes / projects.length).toFixed(1) : 0;
+            activeVotersEl.textContent = activeVoters.size;
+            avgVotesEl.textContent = projects.length > 0 ? (totalVotes / projects.length).toFixed(1) : '0.0';
 
-            loadRanking(projects, totalVotes);
+            // 6. Carregar o ranking com os dados corretos
+            loadRanking(projectsWithSessionVotes, totalVotes);
         }
 
         function loadRanking(projects, totalVotes) {

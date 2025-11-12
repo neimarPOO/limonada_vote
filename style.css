@@ -70,6 +70,18 @@ nav {
     50% { transform: translateY(-4px); }
 }
 
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.lemon-spin {
+    animation-name: spin;
+    animation-duration: 5s; /* Default speed */
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
 .nav-buttons {
     display: flex;
     gap: 1rem;
@@ -154,7 +166,7 @@ nav {
 
 /* Hero Section */
 .hero {
-    background-image: url('fundo.png');
+    background-image: url('fundo01.png');
     background-size: cover;
     background-position: center center;
     color: white;
@@ -1401,10 +1413,14 @@ footer .logo img {
 
 }
 
+#lemon-wrapper {
+    animation: float 3s ease-in-out infinite;
+}
+
 #nav-lemon-icon {
     height: 80px;
     width: auto;
-    animation: float 3s ease-in-out infinite;
+    display: block;
 }
 
 

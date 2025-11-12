@@ -413,6 +413,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (adminBtn) adminBtn.classList.remove('hidden');
     }
 
+    // --- Lemon Animation Logic ---
+    const lemonIcon = document.getElementById('nav-lemon-icon');
+    if (lemonIcon) {
+        lemonIcon.classList.add('lemon-spin');
+
+        function randomizeSpin() {
+            // Generate a random duration between 0.5s (fast) and 5s (slow)
+            const randomDuration = Math.random() * 4.5 + 0.5;
+            lemonIcon.style.animationDuration = `${randomDuration}s`;
+
+            // Generate a random delay for the next change, e.g., between 3s and 8s
+            const randomDelay = Math.random() * 5000 + 3000;
+            setTimeout(randomizeSpin, randomDelay);
+        }
+
+        // Start the animation cycle
+        randomizeSpin();
+    }
+
     initializeApp();
     updateCountdown();
     setInterval(updateCountdown, 60000);

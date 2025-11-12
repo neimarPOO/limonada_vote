@@ -1401,4 +1401,10 @@ footer .logo img {
 
 }
 
+#nav-lemon-icon {
+    height: 80px;
+    width: auto;
+    animation: float 3s ease-in-out infinite;
+}
+
 

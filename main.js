@@ -59,6 +59,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    window.carouselNavigate = (button, direction) => {
+        const carousel = button.closest('.carousel');
+        const carouselInner = carousel.querySelector('.carousel-inner');
+        const items = carouselInner.querySelectorAll('.carousel-item');
+        const itemWidth = items[0].clientWidth; // Assuming all items have the same width
+
+        let currentIndex = 0;
+        // Find the current active item
+        for (let i = 0; i < items.length; i++) {
+            const itemRect = items[i].getBoundingClientRect();
+            const carouselRect = carouselInner.getBoundingClientRect();
+            // Check if the item is mostly visible within the carouselInner
+            if (itemRect.left >= carouselRect.left && itemRect.right <= carouselRect.right + 5) { // +5 for tolerance
+                currentIndex = i;
+                break;
+            }
+        }
+
+        let newIndex = currentIndex + direction;
+
+        if (newIndex < 0) {
+            newIndex = items.length - 1; // Loop to the last item
+        } else if (newIndex >= items.length) {
+            newIndex = 0; // Loop to the first item
+        }
+
+        carouselInner.style.transform = `translateX(-${newIndex * itemWidth}px)`;
+    };
+
 
     // --- App State ---
     let anonymousId = null;

@@ -1461,4 +1461,57 @@ footer .logo img {
     display: block;
 }
 
+/* --- Rating System Styles --- */
+
+.project-footer .footer-stats {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.avg-rating {
+    font-weight: 700;
+    color: var(--secondary); /* Gold color for stars */
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+}
+
+.avg-rating i {
+    font-size: 1rem;
+}
+
+.rating-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rating-section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.rating-stars {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.rating-stars i {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.5); /* Default empty star color on dark background */
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rating-stars i.hover,
+.rating-stars i.rated {
+    color: var(--secondary);
+    transform: scale(1.1);
+}
+
 

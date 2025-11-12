@@ -192,30 +192,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Voting & Rating System ---
+    console.log('main.js: Definindo window.handleVote...');
     window.handleVote = async (projectId) => {
-        if (!anonymousId || !activeSession) {
-            showNotification('Não há uma sessão de votação ativa.', 'error');
-            return;
-        }
-        if (userVoteInSession) {
-            showNotification('Você já votou nesta sessão!', 'error');
-            return;
-        }
-        const { error } = await _supabase.from('votes').insert({ project_id: projectId, user_id: anonymousId, session_uuid: activeSession.session_uuid });
-        if (error) {
-            if (error.code === '23505') { // Unique constraint violation
-                showNotification('Você já votou nesta sessão!', 'error');
-                await getUserVote(anonymousId, activeSession.session_uuid);
-                loadProjects();
-            } else {
-                showNotification('Erro ao registrar voto: ' + error.message, 'error');
-                console.error('Erro ao votar:', error);
+        try {
+            console.error('handleVote: Função iniciada para projectId:', projectId);
+            if (!anonymousId || !activeSession) {
+                showNotification('Não há uma sessão de votação ativa.', 'error');
+                return;
             }
-        } else {
-            showNotification('Voto registrado com sucesso!', 'success');
-            userVoteInSession = projectId; // Update userVoteInSession immediately
-            console.log('handleVote: Voto registrado, userVoteInSession atualizado para:', userVoteInSession);
-            loadProjects(); 
+            if (userVoteInSession) {
+                showNotification('Você já votou nesta sessão!', 'error');
+                return;
+            }
+            const { error } = await _supabase.from('votes').insert({ project_id: projectId, user_id: anonymousId, session_uuid: activeSession.session_uuid });
+            if (error) {
+                if (error.code === '23505') { // Unique constraint violation
+                    showNotification('Você já votou nesta sessão!', 'error');
+                    await getUserVote(anonymousId, activeSession.session_uuid);
+                    loadProjects();
+                } else {
+                    showNotification('Erro ao registrar voto: ' + error.message, 'error');
+                    console.error('Erro ao votar:', error);
+                }
+            } else {
+                showNotification('Voto registrado com sucesso!', 'success');
+                userVoteInSession = projectId; // Update userVoteInSession immediately
+                console.log('handleVote: Voto registrado, userVoteInSession atualizado para:', userVoteInSession);
+                loadProjects(); 
+            }
+        } catch (e) {
+            console.error('handleVote: Erro inesperado na função handleVote:', e);
         }
     };
 

@@ -50,6 +50,7 @@
                                     <th>Autor</th>
                                     <th>Votos</th>
                                     <th>%</th>
+                                    <th>Média</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -169,6 +170,21 @@
                                     <i class="fas fa-rocket"></i> Iniciar Nova Votação
                                 </button>
                             </form>
+                        </div>
+                        <div class="danger-zone" style="margin-top: 2rem;">
+                            <h4>Zerar Dados</h4>
+                            <p>
+                                Estas ações irão apagar permanentemente todos os votos ou classificações.
+                                Use com extrema cautela!
+                            </p>
+                            <div class="form-actions" style="justify-content: center;">
+                                <button type="button" id="resetRatingsBtn" class="btn btn-accent">
+                                    <i class="fas fa-star-half-alt"></i> Zerar Classificações
+                                </button>
+                                <button type="button" id="resetVotesBtn" class="btn btn-accent">
+                                    <i class="fas fa-vote-yea"></i> Zerar Votos
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

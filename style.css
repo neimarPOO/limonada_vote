@@ -1484,8 +1484,10 @@ footer .logo img {
 
 .rating-section {
     margin-top: 1rem;
-    padding-top: 1rem;
+    margin-bottom: 1.5rem; /* Adicionar margem inferior */
+    padding: 1rem 0; /* Adicionar preenchimento vertical */
     border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Adicionar borda inferior para separar */
 }
 
 .rating-section h4 {
@@ -1498,11 +1500,11 @@ footer .logo img {
 .rating-stars {
     display: flex;
     justify-content: center;
-    gap: 0.25rem;
+    gap: 0.5rem; /* Aumentar o espaçamento entre as estrelas */
 }
 
 .rating-stars i {
-    font-size: 1.5rem;
+    font-size: 1.8rem; /* Aumentar um pouco as estrelas */
     color: rgba(255, 255, 255, 0.5); /* Default empty star color on dark background */
     cursor: pointer;
     transition: all 0.2s ease;

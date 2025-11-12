@@ -60,6 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const avgVotesEl = document.getElementById('avgVotes');
         const projectImageFile = document.getElementById('projectImageFile');
         const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const resetRatingsBtn = document.getElementById('resetRatingsBtn');
+        const resetVotesBtn = document.getElementById('resetVotesBtn');
 
         // --- Main Functions ---
         async function loadDashboard() {
@@ -79,62 +81,59 @@ document.addEventListener('DOMContentLoaded', () => {
             const activeSession = (sessionData && sessionData.length > 0) ? sessionData[0] : null;
             const currentSessionUUID = activeSession?.session_uuid;
 
-            // 2. Buscar todos os projetos
-            const { data: projects, error: prjError } = await _supabase.from('projects').select('*');
+            // 2. Buscar todos os projetos com estatísticas completas da VIEW
+            const { data: projects, error: prjError } = await _supabase.from('projects_full_stats').select('*');
             if (prjError) {
                 console.error('Erro ao carregar projetos:', prjError);
                 return;
             }
 
-            // 3. Buscar os votos da sessão ativa
-            let votesMap = new Map();
+            // 3. Buscar os votos da sessão ativa (para totalVotes e activeVoters)
             let totalVotes = 0;
             let activeVoters = new Set();
-
             if (currentSessionUUID) {
                 const { data: votes, error: vtError } = await _supabase
                     .from('votes')
-                    .select('project_id, user_id')
+                    .select('id, user_id')
                     .eq('session_uuid', currentSessionUUID);
 
                 if (vtError) {
                     console.error('Erro ao carregar votos da sessão:', vtError);
                 } else {
-                    votes.forEach(vote => {
-                        votesMap.set(vote.project_id, (votesMap.get(vote.project_id) || 0) + 1);
-                        activeVoters.add(vote.user_id);
-                    });
                     totalVotes = votes.length;
+                    activeVoters = new Set(votes.map(v => v.user_id));
                 }
             }
 
-            // 4. Combinar projetos com os votos da sessão
-            const projectsWithSessionVotes = projects.map(project => ({
-                ...project,
-                votes: votesMap.get(project.id) || 0
-            }));
-
-            // 5. Atualizar as estatísticas do dashboard
+            // 4. Atualizar as estatísticas do dashboard
             totalProjectsEl.textContent = projects.length;
             totalVotesEl.textContent = totalVotes;
             activeVotersEl.textContent = activeVoters.size;
             avgVotesEl.textContent = projects.length > 0 ? (totalVotes / projects.length).toFixed(1) : '0.0';
 
-            // 6. Carregar o ranking com os dados corretos
-            loadRanking(projectsWithSessionVotes, totalVotes);
+            // 5. Carregar o ranking com os dados corretos
+            loadRanking(projects, totalVotes);
         }
 
         function loadRanking(projects, totalVotes) {
-            const sortedProjects = [...projects].sort((a, b) => b.votes - a.votes);
+            // Ordena por votos da sessão, depois por média de rating
+            const sortedProjects = [...projects].sort((a, b) => {
+                if (b.vote_count !== a.vote_count) {
+                    return b.vote_count - a.vote_count;
+                }
+                return (b.average_rating || 0) - (a.average_rating || 0);
+            });
+
             rankingTable.innerHTML = sortedProjects.map((project, index) => {
-                const percentage = totalVotes > 0 ? ((project.votes / totalVotes) * 100).toFixed(1) : 0;
+                const percentage = totalVotes > 0 ? ((project.vote_count / totalVotes) * 100).toFixed(1) : 0;
                 const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'rank-other';
                 return `
                     <tr>
                         <td data-label="Rank"><div class="rank-badge ${rankClass}">${index + 1}</div></td>
                         <td data-label="Projeto"><strong>${project.name}</strong><br><small>${project.category}</small></td>
                         <td data-label="Autor">${project.author}</td>
-                        <td data-label="Votos"><span style="font-weight: 700; color: var(--primary);"><i class="fas fa-heart"></i> ${project.votes}</span></td>
+                        <td data-label="Votos"><span style="font-weight: 700; color: var(--primary);"><i class="fas fa-heart"></i> ${project.vote_count}</span></td>
+                        <td data-label="Média"><span style="font-weight: 700; color: var(--secondary);"><i class="fas fa-star"></i> ${project.average_rating.toFixed(1)} (${project.rating_count})</span></td>
                         <td data-label="%">${percentage}%</td>
                         <td data-label="Ações">
                             <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;" onclick="window.editProject(${project.id})"><i class="fas fa-edit"></i></button>
@@ -679,6 +678,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
         
 
+                        async function handleResetRatings() {
+                            if (!confirm('ATENÇÃO!\n\nVocê está prestes a APAGAR PERMANENTEMENTE TODAS AS CLASSIFICAÇÕES (estrelas) de todos os projetos. Esta ação é irreversível.')) return;
+
+                            showNotification('Zerando classificações...', 'info');
+                            const { error } = await _supabase.from('ratings').delete().neq('id', 0); // Deleta todas as linhas
+
+                            if (error) {
+                                showNotification('Erro ao zerar classificações: ' + error.message, 'error');
+                            } else {
+                                showNotification('Todas as classificações foram zeradas com sucesso!', 'success');
+                                loadDashboard(); // Recarrega o dashboard para refletir as mudanças
+                            }
+                        }
+
+                        async function handleResetVotes() {
+                            if (!confirm('ATENÇÃO!\n\nVocê está prestes a APAGAR PERMANENTEMENTE TODOS OS VOTOS de todos os projetos e sessões. Esta ação é irreversível.')) return;
+
+                            showNotification('Zerando votos...', 'info');
+                            const { error } = await _supabase.from('votes').delete().neq('id', 0); // Deleta todas as linhas
+
+                            if (error) {
+                                showNotification('Erro ao zerar votos: ' + error.message, 'error');
+                            } else {
+                                showNotification('Todos os votos foram zerados com sucesso!', 'success');
+                                loadDashboard(); // Recarrega o dashboard para refletir as mudanças
+                            }
+                        }
+        
                         // --- Tab Navigation & Event Listeners ---
 
         
@@ -728,6 +755,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
 
                         document.getElementById('newSessionForm').addEventListener('submit', handleStartNewVoting);
+            if (resetRatingsBtn) resetRatingsBtn.addEventListener('click', handleResetRatings);
+            if (resetVotesBtn) resetVotesBtn.addEventListener('click', handleResetVotes);
 
         
 
@@ -802,6 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
 
                                                         .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, loadDashboard)
+                                                        .on('postgres_changes', { event: '*', schema: 'public', table: 'ratings' }, loadDashboard)
 
         
 

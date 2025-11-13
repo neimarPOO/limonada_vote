@@ -896,9 +896,3 @@ document.addEventListener('DOMContentLoaded', () => {
         
 
         }
-
-        
-
-        
-
-        

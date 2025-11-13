@@ -463,41 +463,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Real-time Updates ---
     function subscribeToChanges() {
+        console.log('Realtime: Configurando inscrições no canal public-main-changes...');
         const channel = _supabase.channel('public-main-changes');
         channel
             .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, loadProjects)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, async () => {
+                console.log('Realtime: Recebida atualização da tabela de votos.');
                 await getUserVote(anonymousId, activeSession?.session_uuid);
                 loadProjects();
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'ratings' }, async () => {
+                console.log('Realtime: Recebida atualização da tabela de classificações.');
                 await getUserRatings(anonymousId);
                 loadProjects();
             })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, async () => {
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, async (payload) => {
+                console.log('Realtime: RECEBIDA ATUALIZAÇÃO DA TABELA DE SESSÕES!', payload);
                 showNotification('Uma nova sessão de votação começou!', 'info');
                 localStorage.removeItem('limonada_user_id'); // Zera o ID do usuário para a nova sessão
                 await initializeApp();
             })
-            .subscribe();
+            .subscribe((status) => {
+                console.log(`Realtime: Status da inscrição no canal: ${status}`);
+                if (status === 'SUBSCRIBED') {
+                    console.log('Realtime: Inscrição no canal realizada com sucesso!');
+                } else {
+                    console.error(`Realtime: Falha ao se inscrever no canal. Status: ${status}`);
+                }
+            });
     }
 
     // --- Initialization ---
     async function initializeApp() {
+        console.log('initializeApp: Iniciando a aplicação...');
         // Garante que o cliente Supabase esteja em um estado anônimo para a página pública
         await _supabase.auth.signOut();
+        console.log('initializeApp: Sessão de usuário anterior (se houver) foi encerrada.');
  
         getOrSetAnonymousId(); // This sets anonymousId
+        console.log(`initializeApp: ID de usuário anônimo definido como: ${anonymousId}`);
+
         const session = await fetchActiveSession();
         if (session) {
+            console.log(`initializeApp: Sessão de votação ativa encontrada: ${session.session_uuid}`);
             // Fetch both user votes and ratings before loading projects
             await Promise.all([
                 getUserVote(anonymousId, session.session_uuid),
                 getUserRatings(anonymousId)
             ]);
             await loadProjects();
+        } else {
+            console.warn('initializeApp: Nenhuma sessão de votação ativa encontrada.');
         }
         if (adminBtn) adminBtn.classList.remove('hidden');
+        console.log('initializeApp: Aplicação inicializada.');
     }
 
     // --- Lemon Animation Logic ---

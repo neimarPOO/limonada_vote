@@ -557,7 +557,7 @@ nav {
     color: white;
 }
 
-.vote-btn:disabled {
+.vote-btn:disabled:not(.voted) {
     background: var(--border);
     color: var(--text-light);
     border-color: var(--border);
@@ -568,6 +568,7 @@ nav {
     background: var(--success);
     color: white;
     border-color: var(--success);
+    cursor: not-allowed;
 }
 
 /* How It Works */

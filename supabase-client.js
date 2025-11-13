@@ -24,3 +24,7 @@ if (supabaseUrl && supabaseKey) {
     </div>`;
 }
 
+// Torna as chaves acessíveis globalmente para re-inicialização em outros scripts
+window.supabaseUrl = supabaseUrl;
+window.supabaseKey = supabaseKey;
+

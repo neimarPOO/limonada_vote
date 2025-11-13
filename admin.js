@@ -507,170 +507,47 @@ document.addEventListener('DOMContentLoaded', () => {
         
 
                         async function handleStartNewVoting(e) {
-
         
-
                             e.preventDefault();
-
         
-
-                            if (!confirm('ATENÇÃO!\n\nVocê está prestes a iniciar uma NOVA sessão de votação.')) return;
-
+                            if (!confirm('ATENÇÃO!\n\nVocê está prestes a iniciar uma NOVA sessão de votação. TODOS os votos da sessão atual serão PERMANENTEMENTE apagados para permitir que a nova votação comece do zero. Deseja continuar?')) return;
         
+                            showNotification('Iniciando nova sessão e zerando votos...', 'info');
 
-                
-
+                            try {
+                                // 1. Apaga todos os votos existentes
+                                const { error: deleteError } = await _supabase.from('votes').delete().neq('id', 0); // Deleta todas as linhas
+                                if (deleteError) {
+                                    throw new Error(`Erro ao zerar os votos: ${deleteError.message}`);
+                                }
+                                
+                                // 2. Calcula o tempo de término da nova sessão
+                                const days = parseInt(document.getElementById('session_days').value) || 0;
+                                const hours = parseInt(document.getElementById('session_hours').value) || 0;
+                                const minutes = parseInt(document.getElementById('session_minutes').value) || 0;
+                                const totalMilliseconds = (days * 24 * 60 * 60 * 1000) + (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
         
-
-                            const days = parseInt(document.getElementById('session_days').value) || 0;
-
+                                if (totalMilliseconds <= 0) {
+                                    throw new Error('A duração da sessão deve ser maior que zero.');
+                                }
+                                const ends_at = new Date(Date.now() + totalMilliseconds).toISOString();
         
-
-                            const hours = parseInt(document.getElementById('session_hours').value) || 0;
-
+                                // 3. Desativa a sessão antiga
+                                await _supabase.from('sessions').update({ is_active: false }).eq('is_active', true);
         
-
-                            const minutes = parseInt(document.getElementById('session_minutes').value) || 0;
-
+                                // 4. Insere a nova sessão
+                                const { error: insertError } = await _supabase.from('sessions').insert({ ends_at: ends_at, is_active: true });
+                                if (insertError) {
+                                    throw new Error(`Erro ao criar nova sessão: ${insertError.message}`);
+                                }
         
-
-                
-
+                                showNotification('Nova sessão de votação iniciada com sucesso! Todos os votos foram zerados.', 'success');
         
-
-                            const totalMilliseconds = (days * 24 * 60 * 60 * 1000) + (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
-
-        
-
-                
-
-        
-
-                            if (totalMilliseconds <= 0) {
-
-        
-
-                                showNotification('A duração da sessão deve ser maior que zero.', 'error');
-
-        
-
-                                return;
-
-        
-
+                            } catch (error) {
+                                showNotification(error.message, 'error');
+                                console.error(error);
                             }
-
-        
-
-                
-
-        
-
-                                        const ends_at = new Date(Date.now() + totalMilliseconds).toISOString();
-
-        
-
-                
-
-        
-
-                            
-
-        
-
-                
-
-        
-
-                                        // Desativa a sessão antiga
-
-        
-
-                
-
-        
-
-                                        await _supabase.from('sessions').update({ is_active: false }).eq('is_active', true);
-
-        
-
-                
-
-        
-
-                                        
-
-        
-
-                
-
-        
-
-                                        // Insere a nova sessão, marcando-a explicitamente como ativa
-
-        
-
-                
-
-        
-
-                                        const { error } = await _supabase.from('sessions').insert({ ends_at: ends_at, is_active: true });
-
-        
-
-                
-
-        
-
-                            
-
-        
-
-                
-
-        
-
-                                        if (error) {
-
-        
-
-                
-
-        
-
-                                            showNotification('Erro ao criar nova sessão: ' + error.message, 'error');
-
-        
-
-                
-
-        
-
-                                        } else {
-
-        
-
-                
-
-        
-
-                                            showNotification('Nova sessão de votação iniciada com sucesso!', 'success');
-
-        
-
-                
-
-        
-
-                                        }
-
-        
-
-                
-
-        
-
-                                    }
+                        }
 
         
 

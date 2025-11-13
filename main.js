@@ -218,7 +218,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (error) {
                 if (error.code === '23505') { // Unique constraint violation
                     showNotification('Você já votou nesta sessão!', 'error');
+                    console.log('handleVote (409): userVoteInSession ANTES de getUserVote:', userVoteInSession);
                     await getUserVote(anonymousId, activeSession.session_uuid);
+                    console.log('handleVote (409): userVoteInSession DEPOIS de getUserVote:', userVoteInSession);
                     loadProjects();
                 } else {
                     showNotification('Erro ao registrar voto: ' + error.message, 'error');
@@ -265,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Project Loading & UI ---
     async function loadProjects() {
-        console.log('loadProjects: Carregando projetos...');
+        console.log('loadProjects: Carregando projetos... userVoteInSession:', userVoteInSession);
         // Use the new view to get all stats at once
         const { data: projects, error } = await _supabase
             .from('projects_full_stats')

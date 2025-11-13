@@ -472,6 +472,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initialization ---
     async function initializeApp() {
+        // Garante que o cliente Supabase esteja em um estado anônimo para a página pública
+        await _supabase.auth.signOut(); 
         getOrSetAnonymousId();
         const session = await fetchActiveSession();
         if (session) {

@@ -464,6 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'sessions' }, async () => {
                 showNotification('Uma nova sessão de votação começou!', 'info');
+                localStorage.removeItem('limonada_user_id'); // Zera o ID do usuário para a nova sessão
                 await initializeApp();
             })
             .subscribe();

@@ -230,10 +230,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (error) {
                 if (error.code === '23505') { // Unique constraint violation
                     showNotification('Você já votou nesta sessão!', 'error');
-                    console.log('handleVote (409): userVoteInSession ANTES de getUserVote:', userVoteInSession);
-                    await getUserVote(anonymousId, activeSession.session_uuid);
-                    console.log('handleVote (409): userVoteInSession DEPOIS de getUserVote:', userVoteInSession);
-                    loadProjects();
+                    console.log('handleVote (409): Conflito detectado. Forçando atualização do estado da UI.');
+                    // O banco de dados diz que já votamos. Confie no banco de dados e atualize a UI.
+                    userVoteInSession = projectId; // Define manualmente o estado do voto
+                    loadProjects(); // Re-renderiza a UI com o estado corrigido
                 } else {
                     showNotification('Erro ao registrar voto: ' + error.message, 'error');
                     console.error('Erro ao votar:', error);

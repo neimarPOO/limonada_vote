@@ -94,8 +94,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Anonymous ID Management ---
+    function isValidUUID(uuid) {
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        return uuidRegex.test(uuid);
+    }
+
     function getOrSetAnonymousId() {
         let userId = localStorage.getItem('limonada_user_id');
+        // Valida se o userId armazenado é um UUID válido. Se não for, descarta-o.
+        if (userId && !isValidUUID(userId)) {
+            console.warn('UUID inválido encontrado no localStorage para limonada_user_id. Gerando um novo.');
+            userId = null; // Descarta o ID inválido
+            localStorage.removeItem('limonada_user_id'); // Garante que seja totalmente removido
+        }
+
         if (!userId) {
             userId = generateUUID();
             localStorage.setItem('limonada_user_id', userId);

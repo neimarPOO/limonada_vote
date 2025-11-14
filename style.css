@@ -41,15 +41,6 @@ header {
     transition: all 0.3s ease;
 }
 
-nav {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .logo {
     font-size: 1.5rem;
     font-weight: 800;
@@ -1650,10 +1641,22 @@ footer .logo img {
     }
 }
 
-/* -- New Styles for Header and Lemon -- */
+/* -- Final Header and Lemon Styles -- */
 
-/* Header Restructure */
+/* Make nav a grid for easy centering */
+nav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    position: relative; /* New positioning context for the lemon */
+}
+
+.logo {
+    justify-self: start;
+}
+
 .header-right-stack {
+    justify-self: end;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -1670,51 +1673,69 @@ footer .logo img {
 .header-buttons .btn {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
-    min-width: 90px; /* Give them a minimum width */
+    min-width: 90px;
     justify-content: center;
 }
 
-/* Lemon Background in Hero */
-#lemon-bg-wrapper {
+/* Centered Navbar Lemon */
+#nav-lemon-wrapper {
     position: absolute;
-    top: 50%;
     left: 50%;
-    z-index: 0;
-    opacity: 0.08; /* Make it subtle */
-    pointer-events: none; /* Prevent it from capturing mouse events */
+    bottom: 0;
+    transform: translateX(-50%) translateY(50%);
+    z-index: -1; /* Will be hidden by the main content's background */
+    height: 80px;
+    width: 80px;
+    pointer-events: none;
 }
 
-#hero-lemon-icon {
-    animation: continuous-spin 40s linear infinite; /* Slower spin */
-    transform: scale(4);
+#nav-lemon-icon {
+    height: 100%;
+    width: 100%;
+    animation: continuous-spin 20s linear infinite;
 }
 
-/* New continuous spin animation */
+/* Hide any other lemon wrappers */
+#lemon-bg-wrapper, #lemon-wrapper {
+    display: none;
+}
+
 @keyframes continuous-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
-/* Remove old lemon animation classes if they are not used elsewhere */
-.lemon-spin {
-    animation: none; /* Disable old animation */
-}
-#lemon-wrapper {
-    display: none; /* Hide the old wrapper in the nav */
-}
-
-/* Adjustments for mobile */
+/* Responsive adjustments for the new header */
 @media (max-width: 768px) {
     .header-right-stack {
         gap: 0.25rem;
     }
     #user-profile {
-        align-self: flex-end; /* Ensure it stays right-aligned */
+        align-self: flex-end;
     }
     .header-buttons {
         gap: 0.5rem;
     }
     .header-buttons .btn {
         min-width: auto;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    #user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    #user-name {
+        display: none;
+    }
+    /* Hide lemon on very small screens to avoid overlap */
+    @media (max-width: 480px) {
+        #nav-lemon-wrapper {
+            display: none;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+        }
     }
 }

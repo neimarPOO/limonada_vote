@@ -1655,9 +1655,8 @@ nav {
     /* Position the icon relative to the wrapper */
     position: absolute;
     left: 50%;
-    top: 100%; /* Start at the bottom of the wrapper */
-    transform: translate(-50%, -50%); /* Pull it up by half its height */
-    z-index: -1;
+    top: 50%; /* Center vertically inside the wrapper */
+    transform: translate(-50%, -50%); /* Center horizontally */
     pointer-events: none;
 }
 

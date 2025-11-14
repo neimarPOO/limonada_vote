@@ -1643,13 +1643,13 @@ nav {
 #nav-lemon-wrapper {
     justify-self: center; /* Center this grid item in the 'auto' column */
     position: relative;   /* Create a positioning context for the icon */
-    width: 160px;         /* Explicitly set width for the grid column */
+    width: 90px;         /* Explicitly set width for the grid column */
     height: 100px;        /* Match nav height to avoid layout shifts */
 }
 
 #nav-lemon-icon {
-    height: 160px;
-    width: 160px;
+    height: 90px;
+    width: 90px;
     animation: continuous-spin 20s linear infinite;
     
     /* Position the icon relative to the wrapper */

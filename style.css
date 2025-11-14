@@ -1622,6 +1622,7 @@ nav {
     flex-direction: column;
     align-items: flex-end;
     gap: 0.5rem;
+    margin-right: 2rem; /* Add larger margin to the right */
 }
 
 .header-buttons {
@@ -1670,6 +1671,7 @@ nav {
 @media (max-width: 768px) {
     .header-right-stack {
         gap: 0.25rem;
+        margin-right: 1rem; /* Adjust margin for mobile */
     }
     #user-profile {
         align-self: flex-end;

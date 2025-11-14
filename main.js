@@ -366,7 +366,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function initializeRatingStars() { /* Unchanged, but now uses currentUser.id via handleRating */ }
+    function initializeRatingStars() {
+        const ratingContainers = document.querySelectorAll('.rating-stars');
+
+        ratingContainers.forEach(container => {
+            const stars = container.querySelectorAll('.fa-star');
+            const projectId = container.dataset.projectId;
+
+            // Handler for mouseover/mouseout for hover effect
+            const handleMouseOver = (event) => {
+                if (!event.target.matches('.fa-star')) return;
+                const hoverValue = parseInt(event.target.dataset.value);
+                stars.forEach(s => {
+                    s.classList.toggle('hover', parseInt(s.dataset.value) <= hoverValue);
+                });
+            };
+
+            const handleMouseOut = () => {
+                stars.forEach(s => s.classList.remove('hover'));
+            };
+
+            // Handler for click
+            const handleClick = (event) => {
+                if (!event.target.matches('.fa-star')) return;
+                const rating = parseInt(event.target.dataset.value);
+                if (projectId && rating) {
+                    window.handleRating(projectId, rating);
+                }
+            };
+
+            container.addEventListener('mouseover', handleMouseOver);
+            container.addEventListener('mouseout', handleMouseOut);
+            container.addEventListener('click', handleClick);
+        });
+    }
 
     window.carouselNavigate = (carousel, direction) => {
         const carouselInner = carousel.querySelector('.carousel-inner');

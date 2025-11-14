@@ -70,18 +70,6 @@ nav {
     50% { transform: translateY(-4px); }
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.lemon-spin {
-    animation-name: spin;
-    animation-duration: 5s; /* Default speed */
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-}
-
 .nav-buttons {
     display: flex;
     gap: 1rem;
@@ -147,21 +135,6 @@ nav {
 
 .btn-accent:hover {
     background: #e05252;
-}
-
-
-.user-info {
-    display: none;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 500;
-}
-
-.user-info img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 2px solid var(--primary);
 }
 
 /* Hero Section */
@@ -1674,5 +1647,74 @@ footer .logo img {
     #admin-logout-btn {
         padding: 0.5rem 0.75rem;
         font-size: 0.8rem;
+    }
+}
+
+/* -- New Styles for Header and Lemon -- */
+
+/* Header Restructure */
+.header-right-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Ensure consistent button sizing */
+.header-buttons .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    min-width: 90px; /* Give them a minimum width */
+    justify-content: center;
+}
+
+/* Lemon Background in Hero */
+#lemon-bg-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 0;
+    opacity: 0.08; /* Make it subtle */
+    pointer-events: none; /* Prevent it from capturing mouse events */
+}
+
+#hero-lemon-icon {
+    animation: continuous-spin 40s linear infinite; /* Slower spin */
+    transform: scale(4);
+}
+
+/* New continuous spin animation */
+@keyframes continuous-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Remove old lemon animation classes if they are not used elsewhere */
+.lemon-spin {
+    animation: none; /* Disable old animation */
+}
+#lemon-wrapper {
+    display: none; /* Hide the old wrapper in the nav */
+}
+
+/* Adjustments for mobile */
+@media (max-width: 768px) {
+    .header-right-stack {
+        gap: 0.25rem;
+    }
+    #user-profile {
+        align-self: flex-end; /* Ensure it stays right-aligned */
+    }
+    .header-buttons {
+        gap: 0.5rem;
+    }
+    .header-buttons .btn {
+        min-width: auto;
     }
 }

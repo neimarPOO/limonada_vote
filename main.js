@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginContainer.classList.add('hidden');
         appContainer.classList.remove('hidden');
         userProfile.classList.remove('hidden');
+        logoutButton.classList.remove('hidden');
 
         userName.textContent = user.user_metadata?.full_name || user.email;
         userAvatar.src = user.user_metadata?.avatar_url || 'logo02.png';
@@ -69,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginContainer.classList.remove('hidden');
         appContainer.classList.add('hidden');
         userProfile.classList.add('hidden');
+        logoutButton.classList.add('hidden');
     }
 
     // Event Listeners for Login/Logout

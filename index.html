@@ -25,7 +25,13 @@
                 <img src="limao.png" alt="Ícone Limão" id="nav-lemon-icon" />
             </div>
             <div class="header-actions">
-                <a href="admin.html" id="adminBtn" class="btn btn-outline hidden" title="Painel do Administrador">
+                <!-- User profile area, hidden by default -->
+                <div id="user-profile" class="hidden">
+                    <img id="user-avatar" src="" alt="User Avatar" />
+                    <span id="user-name"></span>
+                    <button id="logout-button" class="btn btn-outline"><i class="fas fa-sign-out-alt"></i> Sair</button>
+                </div>
+                <a href="admin.html" id="adminBtn" class="btn btn-outline" title="Painel do Administrador">
                     <i class="fas fa-user-shield"></i> Admin
                 </a>
             </div>
@@ -39,43 +45,54 @@
             <div class="hero-content">
                 <h1>Vote no projeto que mais te impactou</h1>
                 <p>Participe da competição Limonada Summit e vote no projeto mais inovador. Sua opinião faz a diferença!</p>
-                <button class="btn btn-secondary btn-lg" onclick="document.getElementById('projects').scrollIntoView({behavior: 'smooth'})">
-                    <i class="fas fa-vote-yea"></i>
-                    Votar Agora
-                </button>
             </div>
         </section>
 
         <div class="container">
-            <!-- Countdown -->
-            <div class="countdown">
-                <h3><i class="fas fa-clock"></i> Tempo Restante para Votar</h3>
-                <div class="timer" id="countdown">
-                    <div class="timer-item">
-                        <span class="timer-value" id="days">00</span>
-                        <span>Dias</span>
-                    </div>
-                    <div class="timer-item">
-                        <span class="timer-value" id="hours">00</span>
-                        <span>Horas</span>
-                    </div>
-                    <div class="timer-item">
-                        <span class="timer-value" id="minutes">00</span>
-                        <span>Minutos</span>
-                    </div>
+
+            <!-- Login Container -->
+            <div id="login-container">
+                <div class="login-box">
+                    <h2><i class="fas fa-lock"></i> Autenticação Necessária</h2>
+                    <p>Para garantir a integridade da votação, o voto é limitado a um por pessoa. Por favor, entre com sua conta Google para continuar.</p>
+                    <button id="login-button" class="btn btn-google">
+                        <i class="fab fa-google"></i> Entrar com Google para Votar
+                    </button>
                 </div>
             </div>
 
-            <!-- Projects Section -->
-            <section id="projects">
-                <div class="section-header">
-                    <h2>Projetos em Destaque</h2>
-                    <p>Conheça os projetos incríveis criados por nossos jovens talentos</p>
+            <!-- App Container (hidden by default) -->
+            <div id="app-container" class="hidden">
+                <!-- Countdown -->
+                <div class="countdown">
+                    <h3><i class="fas fa-clock"></i> Tempo Restante para Votar</h3>
+                    <div class="timer" id="countdown-timer">
+                        <div class="timer-item">
+                            <span class="timer-value" id="days">00</span>
+                            <span>Dias</span>
+                        </div>
+                        <div class="timer-item">
+                            <span class="timer-value" id="hours">00</span>
+                            <span>Horas</span>
+                        </div>
+                        <div class="timer-item">
+                            <span class="timer-value" id="minutes">00</span>
+                            <span>Minutos</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="projects-grid" id="projectsGrid">
-                    <!-- Projects will be loaded here by main.js -->
-                </div>
-            </section>
+
+                <!-- Projects Section -->
+                <section id="projects">
+                    <div class="section-header">
+                        <h2>Projetos em Destaque</h2>
+                        <p>Conheça os projetos incríveis criados por nossos jovens talentos</p>
+                    </div>
+                    <div class="projects-grid" id="projectsGrid">
+                        <!-- Projects will be loaded here by main.js -->
+                    </div>
+                </section>
+            </div>
 
             <!-- How It Works -->
             <section class="how-it-works">
@@ -86,8 +103,8 @@
                 <div class="steps">
                     <div class="step">
                         <div class="step-number">1</div>
-                        <h3>Explore Projetos</h3>
-                        <p>Veja todos os projetos e conheça as ideias inovadoras</p>
+                        <h3>Autentique-se</h3>
+                        <p>Faça login com sua conta Google para garantir um voto por pessoa.</p>
                     </div>
                     <div class="step">
                         <div class="step-number">2</div>

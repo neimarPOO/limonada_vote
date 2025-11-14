@@ -635,6 +635,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (resetRatingsBtn) resetRatingsBtn.addEventListener('click', handleResetRatings);
             if (resetVotesBtn) resetVotesBtn.addEventListener('click', handleResetVotes);
 
+            const adminLogoutBtn = document.getElementById('admin-logout-btn');
+            if(adminLogoutBtn) {
+                adminLogoutBtn.addEventListener('click', async () => {
+                    showNotification('Saindo...', 'info');
+                    await _supabase.auth.signOut();
+                    window.location.href = 'index.html';
+                });
+            }
+
         
 
                         

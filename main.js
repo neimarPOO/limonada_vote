@@ -349,9 +349,42 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('minutes').textContent = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
     }
 
-    function initializeCarousels() { /* Unchanged */ }
+    function initializeCarousels() {
+        document.querySelectorAll('.carousel').forEach(carousel => {
+            const carouselInner = carousel.querySelector('.carousel-inner');
+            const items = carouselInner.querySelectorAll('.carousel-item');
+
+            if (items.length > 1) {
+                carouselInner.dataset.currentIndex = 0;
+                // Set up automatic navigation
+                setInterval(() => {
+                    window.carouselNavigate(carousel, 1);
+                }, 5000); // Change image every 5 seconds
+            }
+        });
+    }
+
     function initializeRatingStars() { /* Unchanged, but now uses currentUser.id via handleRating */ }
-    window.carouselNavigate = (el, dir) => { /* Unchanged */ };
+
+    window.carouselNavigate = (carousel, direction) => {
+        const carouselInner = carousel.querySelector('.carousel-inner');
+        if (!carouselInner) return;
+        const items = carouselInner.querySelectorAll('.carousel-item');
+        if (items.length <= 1) return;
+
+        const itemWidth = items[0].clientWidth;
+        let currentIndex = parseInt(carouselInner.dataset.currentIndex || 0);
+        let newIndex = currentIndex + direction;
+
+        if (newIndex < 0) {
+            newIndex = items.length - 1;
+        } else if (newIndex >= items.length) {
+            newIndex = 0;
+        }
+
+        carouselInner.style.transform = `translateX(-${newIndex * itemWidth}px)`;
+        carouselInner.dataset.currentIndex = newIndex;
+    };
 
     // --- Initial Load ---
     checkInitialSession();

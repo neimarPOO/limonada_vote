@@ -1517,4 +1517,162 @@ footer .logo img {
     transform: scale(1.1);
 }
 
+/* --- Login View Styles --- */
+#login-container {
+    text-align: center;
+    padding: 4rem 2rem;
+}
 
+.login-box {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    border-top: 4px solid var(--primary);
+}
+
+.login-box h2 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.login-box p {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+
+.btn-google {
+    background-color: #4285F4;
+    color: white;
+    border: none;
+}
+
+.btn-google:hover {
+    background-color: #357ae8;
+}
+
+/* --- User Profile in Header --- */
+#user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+#user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+}
+
+#user-name {
+    font-weight: 600;
+}
+
+#logout-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* --- Danger Zone --- */
+.danger-zone {
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    background: #fff5f5;
+}
+
+.danger-zone h4 {
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+}
+
+.danger-zone p {
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+}
+
+.danger-zone .btn-danger,
+.danger-zone .btn-accent {
+    width: auto;
+    flex-grow: 0;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* --- Admin Project Grid --- */
+#adminProjectsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+#adminProjectsGrid .project-card {
+    height: auto; /* Override the fixed height */
+    animation: fadeIn 0.5s ease forwards;
+}
+
+#adminProjectsGrid .project-card-inner {
+    /* No flipping needed for admin cards */
+}
+
+#adminProjectsGrid .project-image {
+    height: 200px;
+}
+
+#adminProjectsGrid .project-content {
+    padding: 1rem;
+}
+
+#adminProjectsGrid .project-footer {
+    border: none;
+    padding-top: 0.5rem;
+}
+
+/* --- Responsive Header Adjustments --- */
+@media (max-width: 768px) {
+    .header-actions {
+        gap: 0.75rem; /* Reduce gap on mobile */
+    }
+
+    #user-profile {
+        gap: 0.5rem;
+    }
+
+    #user-name {
+        display: none; /* Hide user name on small screens */
+    }
+
+    #user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    #logout-button, #adminBtn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    #admin-logout-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}
